@@ -2,7 +2,9 @@ import express from "express";
 import type{ Express} from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import  {async_handler} from "./utils/async_handler.js"
+import routers from "./router/index.js";
+
+
 
 
 class express_app {
@@ -15,6 +17,7 @@ class express_app {
 
         this.app.use(express.json())
         this.app.use(cookieParser())
+        this.app.use("/api/auth",routers);
     }
 }
 
