@@ -13,7 +13,7 @@ class api_responce {
     this.statuscode = statusCode;
     this.data = data;
     this.message = message;
-    this.success = true
+    this.success =  statusCode <400 ? true :false
   }
 }
 
