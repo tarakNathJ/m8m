@@ -1,5 +1,7 @@
 import type { type_for_responce } from "../types/index.js";
 
+
+
 class api_error extends Error {
   statuscode!: type_for_responce["statuscode"];
   errors :type_for_responce["error"];

@@ -13,3 +13,6 @@ const async_handler =
       });
     }
   };
+
+
+export {async_handler}

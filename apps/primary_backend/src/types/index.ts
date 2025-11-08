@@ -4,13 +4,13 @@ export type asyncFunction = (
   req: Request,
   res: Response,
   next: NextFunction
-) => Promise<any>;
+) => Promise<type_for_responce | any>;
 
 export type type_for_responce = {
   statuscode: number;
   data: JSON | null;
   message: string;
-  success: boolean;
+  success?: boolean;
   error?: Error | [];
   stack ?: string | null
 };
