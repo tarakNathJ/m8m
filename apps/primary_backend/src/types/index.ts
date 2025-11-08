@@ -8,7 +8,7 @@ export type asyncFunction = (
 
 export type type_for_responce = {
   statuscode: number;
-  data: JSON | null;
+  data: object | null;
   message: string;
   success?: boolean;
   error?: Error | [];

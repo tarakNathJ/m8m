@@ -30,4 +30,4 @@ class api_error extends Error {
   
 
 
-export default { api_error}
+export  { api_error}

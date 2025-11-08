@@ -19,4 +19,4 @@ class api_responce {
 }
 
 
-export default {api_responce}
+export  {api_responce}

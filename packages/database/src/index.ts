@@ -9,17 +9,24 @@ import { config } from "dotenv";
 
 config()
 declare global {
-  var prisma: PrismaClient | undefined
+  var prisma: PrismaClient | undefined;
 }
 
-export const  prisma = globalThis.prisma ||  new PrismaClient({
+
+
+
+
+export const prisma = global.prisma || new PrismaClient({
     log: ["query", "error", "warn"],
   });
 
 
+
 if (process.env.NODE_ENV !== "production") global.prisma = prisma;
 
-
-export const  schemaType  : any = {
-   status ,work_type , working_status , step_validation_status
-}
+export const schemaType = {
+  status,
+  work_type,
+  working_status,
+  step_validation_status,
+} as const;
