@@ -1,0 +1,16 @@
+import type { Request, Response, NextFunction } from "express";
+
+export type asyncFunction = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => Promise<any>;
+
+export type type_for_responce = {
+  statuscode: number;
+  data: JSON | null;
+  message: string;
+  success: boolean;
+  error?: Error | null;
+  stack ?: string | null
+};
