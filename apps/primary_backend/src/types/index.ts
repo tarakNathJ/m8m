@@ -11,6 +11,6 @@ export type type_for_responce = {
   data: JSON | null;
   message: string;
   success: boolean;
-  error?: Error | null;
+  error?: Error | [];
   stack ?: string | null
 };
