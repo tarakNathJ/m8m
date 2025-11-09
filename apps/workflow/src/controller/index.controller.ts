@@ -129,7 +129,7 @@ export const create_step = async_handler(
     const find_user_are_exist_or_not = await prisma.user.findFirst({
       where: {
         //@ts-ignore
-        email: req.email,
+        id: req.id,
       },
     });
     if (!find_user_are_exist_or_not) {
@@ -230,23 +230,11 @@ export const get_all_steps = async_handler(async (req, res) => {
     }
   }
 
-  const find_user_are_exist_or_not = await prisma.user.findFirst({
-    where: {
-      //@ts-ignore
-      email: req.email,
-    },
-    select: {
-      id: true,
-    },
-  });
-  if (!find_user_are_exist_or_not) {
-    throw new api_error(409, "user are not exist , try again", Error.prototype);
-  }
-
   const find_steps = await prisma.step.findMany({
     where: {
       workflow_id: workflowId,
-      user_id: find_user_are_exist_or_not.id,
+      // @ts-ignore
+      user_id: req.id,
     },
   });
   return res
