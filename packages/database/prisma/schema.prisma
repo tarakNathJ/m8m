@@ -45,6 +45,7 @@ model user {
   create_at DateTime 
   update_at DateTime  @default(now())
   stepes step[]
+  workflow workflow[]
 
   @@index([email])
 }
@@ -66,9 +67,11 @@ model typeofstep{
 model workflow {
   id Int  @id @default(autoincrement())
   name String @unique 
+  user_id Int
   status  status
   create_at DateTime 
   update_at DateTime @default(now())
+  user user @relation(references: [id],fields: [user_id])
   stepes step[]
   stepes_runs stepes_run[]
 
