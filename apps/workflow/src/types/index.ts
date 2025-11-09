@@ -10,7 +10,7 @@ export interface responceType {
   statusCode: number;
   data?: object | {};
   message: string;
-  error?: Error;
+  error?: Error |{};
   success: boolean;
   stack?: string;
 }
