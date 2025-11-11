@@ -4,7 +4,9 @@ import {
   work_type,
   working_status,
   step_validation_status,
-} from "@prisma/client";
+  Type
+  
+} from "../generated/prisma/index.js";
 import { config } from "dotenv";
 
 config()
@@ -29,4 +31,6 @@ export const schemaType = {
   work_type,
   working_status,
   step_validation_status,
+  Type
+  
 } as const;

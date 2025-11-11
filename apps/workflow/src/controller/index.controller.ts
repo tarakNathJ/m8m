@@ -7,7 +7,7 @@ import { type_chack_for_steps_metadata } from "../utils/meta_data_object_chack.j
 
 export const create_types_of_steps = async_handler(
   async (req: Request, res: Response) => {
-    const { name, app, work_type, meta_data, image_url } = req.body;
+    const { name, app, action, work_type, meta_data, image_url } = req.body;
 
     // chack all field and chack metadata are object or not null
     // chack in bd  : exist or not
@@ -15,7 +15,9 @@ export const create_types_of_steps = async_handler(
     // chack db entry : success of failed
     // return success responce
 
-    if ([name, app, work_type, image_url].some((field) => field === "")) {
+    if (
+      [name, app, action, work_type, image_url].some((field) => field === "")
+    ) {
       throw new api_error(400, "all field are required", Error.prototype);
     }
     if (typeof meta_data !== "object" && meta_data !== null) {
@@ -41,6 +43,7 @@ export const create_types_of_steps = async_handler(
         name: name,
         app: app,
         work_type: work_type,
+        action: action,
         meta_data: meta_data,
         image_url: image_url,
         create_at: new Date(),
@@ -174,16 +177,12 @@ export const create_step = async_handler(
       );
     }
 
-    const chack_step_are_exist = await prisma.step.findFirst({
-      where: {
-        index: index,
-      },
-    });
     const create_step = await prisma.step.upsert({
       where: {
-        id: chack_step_are_exist?.id,
-        index: index,
-        workflow_id: chack_workflow_exist_or_not.id,
+        workflow_id_index: {
+          index: index,
+          workflow_id: chack_workflow_exist_or_not.id,
+        },
       },
       update: {
         name,
@@ -221,6 +220,44 @@ export const create_step = async_handler(
       .json(new api_responce(201, create_step, "success fully create step"));
   })
 );
+
+export const create_work_flow = async_handler(async (req, res) => {
+  const { name } = req.body();
+  if (!name) {
+    throw new api_error(400, "full fill all requirement", Error.prototype);
+  }
+
+  const find_user_are_exist_or_not = await prisma.user.findFirst({
+    where: {
+      //@ts-ignore
+      id: req.id,
+    },
+  });
+  if (!find_user_are_exist_or_not) {
+    throw new api_error(409, "user are not exist , try again", Error.prototype);
+  }
+
+  const create_workflow = await prisma.workflow.create({
+    data:{
+      name:`${name}-${new Date}`,
+      user_id: find_user_are_exist_or_not.id,
+      status:"ACTIVE",
+      create_at:new Date()
+    },
+    select:{
+      name:true,
+      create_at:true
+    }
+  })
+
+  if(!create_workflow){
+    throw new api_error(400,"db entry failed : try again", Error.prototype)
+  }
+
+  return res.status(201).json(new api_responce(201,create_workflow,"success fully create your workflow"))
+
+});
+
 
 export const get_all_steps = async_handler(async (req, res) => {
   const { workflowId } = req.body;
