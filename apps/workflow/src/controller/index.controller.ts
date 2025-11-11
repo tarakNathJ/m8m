@@ -71,6 +71,7 @@ export const create_types_of_steps = async_handler(
   }
 );
 
+// get all typesofstep
 export const get_all_types_of_step = async_handler(async (req, res) => {
   const get_all_type_of_step = await prisma.typeofstep.findMany();
   if (!get_all_type_of_step) {
@@ -81,6 +82,7 @@ export const get_all_types_of_step = async_handler(async (req, res) => {
     .json(new api_responce(200, [], " success fully get all data "));
 });
 
+//create stpe
 export const create_step = async_handler(
   async_handler(async (req, res) => {
     const { name, index, workflow_id, meta_data, typeofstap_id } = req.body;
@@ -98,6 +100,7 @@ export const create_step = async_handler(
 
     let status = false;
 
+    // chack every apps metadata are exist or not
     switch (name) {
       case "gmail":
         status = new type_chack_for_steps_metadata().is_gmail(meta_data);
@@ -129,25 +132,12 @@ export const create_step = async_handler(
       );
     }
 
-    const find_user_are_exist_or_not = await prisma.user.findFirst({
-      where: {
-        //@ts-ignore
-        id: req.id,
-      },
-    });
-    if (!find_user_are_exist_or_not) {
-      throw new api_error(
-        409,
-        "user are not exist , try again",
-        Error.prototype
-      );
-    }
-
+    // chack workflow are exist or not
     const chack_workflow_exist_or_not = await prisma.workflow.findFirst({
       where: {
         id: workflow_id,
         //@ts-ignore
-        user_id: find_user_are_exist_or_not.id,
+        user_id: req.user.id,
       },
     });
     if (!chack_workflow_exist_or_not) {
@@ -157,6 +147,8 @@ export const create_step = async_handler(
         Error.prototype
       );
     }
+
+    // chack typeofstep  are exist or not
     const chack_typeofstep_are_exist_or_not = await prisma.typeofstep.findFirst(
       {
         where: {
@@ -177,6 +169,7 @@ export const create_step = async_handler(
       );
     }
 
+    // even step are exist thi update or not exist then then creat
     const create_step = await prisma.step.upsert({
       where: {
         workflow_id_index: {
@@ -187,7 +180,8 @@ export const create_step = async_handler(
       update: {
         name,
         typeofstap_id: chack_typeofstep_are_exist_or_not.id,
-        user_id: find_user_are_exist_or_not.id,
+        //@ts-ignore
+        user_id: req.user.id,
         workflow_id: chack_workflow_exist_or_not.id,
         meta_data,
         status: schemaType.status.ACTIVE,
@@ -198,7 +192,8 @@ export const create_step = async_handler(
         name,
         index,
         typeofstap_id: chack_typeofstep_are_exist_or_not.id,
-        user_id: find_user_are_exist_or_not.id,
+        // @ts-ignore
+        user_id: req.user.id,
         workflow_id: chack_workflow_exist_or_not.id,
         meta_data,
         status: schemaType.status.ACTIVE,
@@ -229,50 +224,56 @@ export const create_work_flow = async_handler(async (req, res) => {
 
   // create new workflow
   const create_workflow = await prisma.workflow.create({
-    data:{
-      name:`${name}-${new Date}`,
+    data: {
+      name: `${name}-${new Date()}`,
       //@ts-ignore
       user_id: req.user.id,
-      status:"ACTIVE",
-      create_at:new Date()
+      status: "ACTIVE",
+      //@ts-ignore
+      create_at: new Date(),
     },
-    select:{
-      name:true,
-      create_at:true
-    }
-  })
+    select: {
+      name: true,
+      create_at: true,
+    },
+  });
 
-  if(!create_workflow){
-    throw new api_error(400,"db entry failed : try again", Error.prototype)
+  // chack workflow are actually are create or not
+  if (!create_workflow) {
+    throw new api_error(400, "db entry failed : try again", Error.prototype);
   }
 
-  return res.status(201).json(new api_responce(201,create_workflow,"success fully create your workflow"))
-
+  return res
+    .status(201)
+    .json(
+      new api_responce(
+        201,
+        create_workflow,
+        "success fully create your workflow"
+      )
+    );
 });
 
-export const get_all_workflow = async_handler(async(req ,res)=>{
-// get  all workflow
+// get all  workflow
+export const get_all_workflow = async_handler(async (req, res) => {
+  // get  all workflow
   const get_workflow = await prisma.workflow.findMany({
-    where:{
+    where: {
       // @ts-ignore
-      user_id:req.user.id
-    }
-  })
-
-
-  if (!get_workflow){
-
-    throw new api_error(400, "you dont have any workflow",Error.prototype)
-
+      user_id: req.user.id,
+    },
+  });
+  // chack workflow are exist or not
+  if (!get_workflow) {
+    throw new api_error(400, "you dont have any workflow", Error.prototype);
   }
 
-  return res.status(200).json( new  api_responce (200,get_workflow,"this is your  all workflow") )
-  
-})
+  return res
+    .status(200)
+    .json(new api_responce(200, get_workflow, "this is your  all workflow"));
+});
 
-
-
-
+// get all steps
 export const get_all_steps = async_handler(async (req, res) => {
   const { workflowId } = req.body;
   if (!workflowId) {
@@ -291,4 +292,68 @@ export const get_all_steps = async_handler(async (req, res) => {
   return res
     .status(200)
     .json(new api_responce(200, find_steps, "thats your all steps"));
+});
+
+// webhook call
+export const webhook_call = async_handler(async (req, res) => {
+  const { workflow_id , user_id } = req.params;
+  const body = req.body
+
+  //@ts-ignore
+  if (!parseInt(workflow_id) || !parseInt(user_id) ) {
+    throw new api_error(400, "all field are required", Error.prototype);
+  }
+  const  find_workflow_are_exist_or_not = await prisma.workflow.findFirst({
+    where:{
+      // @ts-ignore
+      id:workflow_id,
+      // @ts-ignore
+      user_id:user_id
+    },
+    select:{
+      id:true
+    }
+  })
+
+  if(!find_workflow_are_exist_or_not){
+    throw new api_error(404, "workflow are not exist",Error.prototype)
+  }
+
+  const create_transaction = await prisma.$transaction(async(ts)=>{
+    const create_stepes_run =  await ts.stepes_run.create({
+      data:{
+        meta_data:body,
+        status:"CREATE",
+        workflow_id:find_workflow_are_exist_or_not.id,
+        //@ts-ignore
+        create_at:new Date()
+      },
+      
+    })
+    await ts.out_box_step_run.create({
+      data:{
+        stepes_run_id:create_stepes_run.id,
+        // @ts-ignore
+        create_at:new Date()
+      }
+    })
+
+    return true
+
+  })
+
+  if (!create_transaction) {
+    throw new api_error(400, "db entry failed : try again", Error.prototype);
+  }
+
+  return res
+    .status(201)
+    .json(
+      new api_responce(
+        201,
+        [],
+        "success fully create your workflow"
+      )
+    );
+
 });

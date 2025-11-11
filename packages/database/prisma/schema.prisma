@@ -37,6 +37,7 @@ enum step_validation_status {
   NEXTSTAGE
   DONE
 }
+
 enum Type {
   TRIGGER
   ACTION
@@ -59,7 +60,7 @@ model user {
 model typeofstep {
   id        Int       @id @default(autoincrement())
   name      String    @unique
-  app       String    @unique  
+  app       String    @unique
   work_type work_type
   action    Type
   meta_data Json
@@ -73,7 +74,7 @@ model typeofstep {
 
 model workflow {
   id          Int          @id @default(autoincrement())
-  name        String       
+  name        String
   user_id     Int
   status      status
   create_at   DateTime
@@ -86,7 +87,7 @@ model workflow {
 }
 
 model step {
-  id            Int          @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   name          String?
   index         Int
   typeofstap_id Int
@@ -95,25 +96,22 @@ model step {
   meta_data     Json
   status        status
   create_at     DateTime
-  update_at     DateTime     @default(now())
-  typeofstep    typeofstep   @relation(references: [id], fields: [typeofstap_id])
-  user          user         @relation(references: [id], fields: [user_id])
-  workflow      workflow     @relation(references: [id], fields: [workflow_id])
-  stepes_runs   stepes_run[]
+  update_at     DateTime   @default(now())
+  typeofstep    typeofstep @relation(references: [id], fields: [typeofstap_id])
+  user          user       @relation(references: [id], fields: [user_id])
+  workflow      workflow   @relation(references: [id], fields: [workflow_id])
 
   @@unique([workflow_id, index])
   @@index([workflow_id, id, user_id, index])
 }
 
 model stepes_run {
-  id                      Int                      @id @default(autoincrement())
-  meta_data               Json
-  status                  working_status
-  step_id                 Int
-  workflow_id             Int
-  create_at               DateTime
-  update_at               DateTime                 @default(now())
-  step                    step                     @relation(references: [id], fields: [step_id])
+  id        Int            @id @default(autoincrement())
+  meta_data Json
+  status    working_status
+  workflow_id Int
+  create_at   DateTime
+  update_at   DateTime @default(now())
   workflow                workflow                 @relation(references: [id], fields: [workflow_id])
   out_box_step_run        out_box_step_run[]
   working_step_validation working_step_validator[]
