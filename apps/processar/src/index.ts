@@ -14,12 +14,14 @@ async function init_kafka_producer(): Promise<Producer> {
     console.error(" invalid Kafka environment variables");
     process.exit(1);
   }
-
+  console.log("clientId : ", clientId);
+  console.log("brokers : ", brokers);
   const kafka = new Kafka({
     clientId: clientId,
-    brokers: [brokers],
+    brokers: ['localhost:9092'],
   });
   producer = kafka.producer();
+  console.log("producer : ", producer);
 
   return producer;
 }
@@ -35,10 +37,12 @@ const process_all_data = async () => {
       let get_producer: Producer;
       const topic = process.env.KAFKA_TOPIC;
       // @ts-ignore
-      if (chack_all_process.length !== 0 || !topic) {
+      if (chack_all_process.length !== 0 || topic) {
         get_producer = await init_kafka_producer();
-        get_producer.connect();
+        await get_producer.connect();
       }
+      // @ts-ignore
+      console.log( "produce  conne :   ",get_producer)
       // @ts-ignore
       chack_all_process.map((data: any) => {
         get_producer.send({

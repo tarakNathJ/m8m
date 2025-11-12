@@ -1,4 +1,6 @@
 import { Kafka, type Consumer, type Producer } from "kafkajs";
+import dotenv from "dotenv";
+dotenv.config();
 
 let producer: Producer;
 let consumer: Consumer;
@@ -51,7 +53,7 @@ async function work_executer() {
     get_consumer.run({
       autoCommit: true,
       eachMessage: async ({ topic, partition, message }) => {
-        console.log("value of  :-   ",message.value);
+        console.log("value of  :-   ",JSON.parse(message.value?.toString() || ""));
 
       },
     });

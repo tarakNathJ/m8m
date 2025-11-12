@@ -26,13 +26,14 @@ class type_chack_for_steps_metadata {
   }
 
   is_telegram(obj: telegram): boolean {
+    console.log(obj)
     if (
       typeof obj === "object" &&
       obj !== null &&
       "chatId" in obj &&
       "token" in obj &&
       typeof obj.token === "string" &&
-      typeof obj.chatId === "string"
+      typeof obj.chatId === "number"
     ) {
       return true;
     } else {

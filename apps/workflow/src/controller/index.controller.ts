@@ -86,7 +86,7 @@ export const get_all_types_of_step = async_handler(async (req, res) => {
 export const create_step = async_handler(
   async_handler(async (req, res) => {
     const { name, index, workflow_id, meta_data, typeofstap_id } = req.body;
-    console.log(name,"  :  " ,index,"  :  ", workflow_id,"  :  ", meta_data, "  :   ", typeofstap_id )
+    // console.log(name,"  :  " ,index,"  :  ", workflow_id,"  :  ", meta_data, "  :   ", typeofstap_id )
     if (
       !name ==  null  ||
       !index ==  null  ||
@@ -309,18 +309,23 @@ export const get_all_steps = async_handler(async (req, res) => {
 // webhook call
 export const webhook_call = async_handler(async (req, res) => {
   const { workflow_id , user_id } = req.params;
+  console.log(workflow_id ," : ",user_id);
   const body = req.body
 
   //@ts-ignore
-  if (!parseInt(workflow_id) || !parseInt(user_id) ) {
+  const convert_workflow_id_string_to_number = parseInt(workflow_id)
+  //@ts-ignore
+  const convert_user_id_string_to_number = parseInt(user_id)
+
+  if (convert_workflow_id_string_to_number == null || convert_user_id_string_to_number == null)  {
     throw new api_error(400, "all field are required", Error.prototype);
   }
   const  find_workflow_are_exist_or_not = await prisma.workflow.findFirst({
     where:{
       // @ts-ignore
-      id:workflow_id,
+      id:convert_workflow_id_string_to_number,
       // @ts-ignore
-      user_id:user_id
+      user_id:convert_user_id_string_to_number
     },
     select:{
       id:true
