@@ -119,6 +119,9 @@ export const create_step = async_handler(
       case "form":
         status = new type_chack_for_steps_metadata().is_from(meta_data);
         break;
+      case "webhook":
+        status = new type_chack_for_steps_metadata().is_webhook(meta_data);
+        break;
       default:
         status = false;
         break;
@@ -168,6 +171,15 @@ export const create_step = async_handler(
         Error.prototype
       );
     }
+
+    if (chack_typeofstep_are_exist_or_not.app === "webhook"  && name === "webhook"){
+      // @ts-ignore
+      meta_data.URL = `${process.env.WORKFLOW_SERVER_URL}/${req.user.id}/${chack_workflow_exist_or_not.id}`
+    }
+
+
+
+
 
     // even step are exist thi update or not exist then then creat
     const create_step = await prisma.step.upsert({
@@ -299,7 +311,7 @@ export const webhook_call = async_handler(async (req, res) => {
   const { workflow_id , user_id } = req.params;
   const body = req.body
 
-  //@ts-ignore
+  
   if (!parseInt(workflow_id) || !parseInt(user_id) ) {
     throw new api_error(400, "all field are required", Error.prototype);
   }

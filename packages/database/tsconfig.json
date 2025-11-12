@@ -1,21 +1,12 @@
 {
+  "extends": "../../typescript-config/base.json",
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "lib": ["esnext"],
     "types": ["node"],
     "sourceMap": true,
     "declaration": true,
-    "declarationMap": true,
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "skipLibCheck": true
+    "declarationMap": true
   },
   "include": ["src"]
 }

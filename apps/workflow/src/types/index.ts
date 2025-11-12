@@ -41,3 +41,8 @@ export interface recerve_email {
   email: string;
   app_password: string;
 }
+
+export type webhook = {
+  METHOD: string;
+};
+

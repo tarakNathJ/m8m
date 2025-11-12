@@ -4,6 +4,7 @@ import type {
   recerve_email,
   scheduler,
   form,
+  webhook
 } from "../types/index.js";
 
 class type_chack_for_steps_metadata {
@@ -71,8 +72,8 @@ class type_chack_for_steps_metadata {
     }
   }
 
-//   chack from all field
-  private  is_form_field_chacker(obj: form): obj is form {
+  //   chack from all field
+  private is_form_field_chacker(obj: form): obj is form {
     return (
       typeof obj === "object" &&
       obj !== null &&
@@ -82,25 +83,32 @@ class type_chack_for_steps_metadata {
     );
   }
 
-
   is_from(obj: object): boolean {
     // chack this  object are not null
     if (typeof obj !== "object" || obj === null) {
       return false;
     }
 
-    let field :form
+    let field: form;
     // @ts-ignore
-    for ( field in obj) {
-        if(!this.is_form_field_chacker(field)){
-            return false
-        }
+    for (field in obj) {
+      if (!this.is_form_field_chacker(field)) {
+        return false;
+      }
     }
 
+    return true;
+  }
 
-    return true
+  // webhook
+  is_webhook(obj: webhook): boolean {
+    // chack this  object are not null
+   if (typeof obj === "object" && obj !== null && "METHOD" in obj && typeof obj .METHOD === "string") {
+      return true;
+    } else {
+      return false
+    }
   }
 }
 
-
-export {type_chack_for_steps_metadata};
+export { type_chack_for_steps_metadata };
