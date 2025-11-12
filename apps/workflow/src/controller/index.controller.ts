@@ -86,12 +86,12 @@ export const get_all_types_of_step = async_handler(async (req, res) => {
 export const create_step = async_handler(
   async_handler(async (req, res) => {
     const { name, index, workflow_id, meta_data, typeofstap_id } = req.body;
-
+    console.log(name,"  :  " ,index,"  :  ", workflow_id,"  :  ", meta_data, "  :   ", typeofstap_id )
     if (
-      !name ||
-      !index ||
-      !workflow_id ||
-      !typeofstap_id ||
+      !name ==  null  ||
+      !index ==  null  ||
+      !workflow_id ==  null  ||
+      !typeofstap_id ==  null  ||
       typeof meta_data !== "object" ||
       meta_data === null
     ) {
@@ -311,7 +311,7 @@ export const webhook_call = async_handler(async (req, res) => {
   const { workflow_id , user_id } = req.params;
   const body = req.body
 
-  
+  //@ts-ignore
   if (!parseInt(workflow_id) || !parseInt(user_id) ) {
     throw new api_error(400, "all field are required", Error.prototype);
   }
