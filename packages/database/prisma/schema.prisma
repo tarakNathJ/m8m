@@ -82,6 +82,7 @@ model workflow {
   user        user         @relation(references: [id], fields: [user_id])
   stepes      step[]
   stepes_runs stepes_run[]
+  mail_template mail_template[]
 
   @@index([id])
 }
@@ -115,6 +116,7 @@ model stepes_run {
   workflow                workflow                 @relation(references: [id], fields: [workflow_id])
   out_box_step_run        out_box_step_run[]
   working_step_validation working_step_validator[]
+  mail_template mail_template[]
 
   @@index([id])
 }
@@ -151,4 +153,17 @@ model reseve_email_validator {
   working_step_validator    working_step_validator @relation(references: [id], fields: [working_step_validator_id])
 
   @@index([working_step_validator_id])
+}
+
+
+model mail_template {
+  id Int @id  @default(autoincrement())
+  workflow_id Int
+  step_run_id Int
+  template Json
+  create_at DateTime
+  update_at DateTime @default(now())
+  workflow workflow @relation(references: [id], fields: [workflow_id])
+  stepes_run stepes_run @relation(references: [id], fields: [step_run_id])
+
 }
