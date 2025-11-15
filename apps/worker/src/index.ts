@@ -1,5 +1,13 @@
 import { Kafka, type Consumer, type Producer } from "kafkajs";
+import { database_service_provider } from "./utils/db_operation.js";
+import { mail_sender } from "./apps/gmail.app.js";
 import dotenv from "dotenv";
+import { send_message_on_telegram_bot } from "./apps/telegram.app.js";
+import { request_transfer_on_your_right_direction } from "./utils/routing_all_request.js";
+import type {
+  object_type_for_email,
+  object_type_for_telegram,
+} from "./types/index.js";
 dotenv.config();
 
 let producer: Producer;
@@ -44,7 +52,6 @@ async function work_executer() {
       process.exit(1);
     });
 
-
     await get_consumer.subscribe({
       topic: topic,
       fromBeginning: true,
@@ -53,8 +60,168 @@ async function work_executer() {
     get_consumer.run({
       autoCommit: true,
       eachMessage: async ({ topic, partition, message }) => {
-        console.log("value of  :-   ",JSON.parse(message.value?.toString() || ""));
+        if (!message.value) {
+          return;
+        }
+        const data = JSON.parse(message.value?.toString());
 
+        if (data.type == "MESSAGE_FROM_PROECSSOR") {
+          // chack in our data base data are exist or not
+          const db_data = await new database_service_provider().getdata(
+            data.run.stepes_run_id,
+            data.stage
+          );
+
+          if (
+            !db_data ||
+            db_data.length == 0 ||
+            !db_data.get_step_find_by_id_and_index
+          ) {
+            return;
+          }
+
+          let template:
+            | object_type_for_email
+            | object_type_for_telegram
+            | null = null;
+
+          // chack which type of work
+          switch (db_data.get_step_find_by_id_and_index.name) {
+            case "gmail":
+              const email_template = {
+                sender_email:
+                  db_data.get_step_find_by_id_and_index.meta_data.email,
+                app_password:
+                  db_data.get_step_find_by_id_and_index.meta_data.app_password,
+                message:
+                  db_data.get_step_find_by_id_and_index.meta_data.message,
+                receiver_email: db_data.get_steprun_table?.meta_data.email,
+                subject: " n8n ",
+                stepes_run_id: data.run.stepes_run_id,
+                stage: data.stage,
+              };
+              template = email_template;
+              break;
+            case "telegram":
+              const telegram_template = {
+                token: db_data.get_step_find_by_id_and_index.meta_data.token,
+                chat_id: db_data.get_step_find_by_id_and_index.meta_data.chatId,
+                message: db_data.get_steprun_table.meta_data,
+              };
+              template = telegram_template;
+              break;
+            default:
+              break;
+          }
+
+          if (!template) {
+            return;
+          }
+          //
+          await new request_transfer_on_your_right_direction().routing_all_request_on_right_direction(
+            db_data.get_step_find_by_id_and_index.name,
+            template
+          );
+          // produce new message for next->target
+          const get_producer = init_producer();
+          await get_producer.connect();
+          await get_producer.send({
+            topic: process.env.KAFKA_TOPIC as string,
+            messages: [
+              {
+                value: JSON.stringify({
+                  type: "MESSAGE_FROM_WORKER",
+                  run: data.run,
+                  stage: data.stage + 1,
+                }),
+              },
+            ],
+          });
+        } else if (data.type == "MESSAGE_FROM_WORKER") {
+          if (!data.run) {
+            return;
+          }
+
+          // chack in our data base  data  exist or not
+          const db_data = await new database_service_provider().getdata(
+            data.run.stepes_run_id,
+            data.stage
+          );
+
+          if (
+            !db_data ||
+            db_data.length == 0 ||
+            !db_data.get_step_find_by_id_and_index
+          ) {
+            console.log("no data found");
+            return;
+          }
+          let template:
+            | object_type_for_email
+            | object_type_for_telegram
+            | null = null;
+
+          // chack which type of work
+          switch (db_data.get_step_find_by_id_and_index.name) {
+            case "gmail":
+              const email_template = {
+                sender_email:
+                  db_data.get_step_find_by_id_and_index.meta_data.email,
+                app_password:
+                  db_data.get_step_find_by_id_and_index.meta_data.app_password,
+                message:
+                  db_data.get_step_find_by_id_and_index.meta_data.message,
+                receiver_email: db_data.get_steprun_table?.meta_data.email,
+                subject: " n8n ",
+                stepes_run_id: data.run.stepes_run_id,
+                stage: data.stage,
+              };
+              template = email_template;
+              break;
+            case "telegram":
+              const telegram_template = {
+                token: db_data.get_step_find_by_id_and_index.meta_data.token,
+                chat_id: db_data.get_step_find_by_id_and_index.meta_data.chatId,
+                message: db_data.get_steprun_table.meta_data,
+              };
+              template = telegram_template;
+              break;
+            default:
+              break;
+          }
+
+          if (!template) {
+            return;
+          }
+          //
+          await new request_transfer_on_your_right_direction().routing_all_request_on_right_direction(
+            db_data.get_step_find_by_id_and_index.name,
+            template
+          );
+          // produce new message for next->target
+          const get_producer = init_producer();
+          await get_producer.connect();
+          await get_producer.send({
+            topic: process.env.KAFKA_TOPIC as string,
+            messages: [
+              {
+                value: JSON.stringify({
+                  type: "MESSAGE_FROM_WORKER",
+                  run: data.run,
+                  stage: data.stage + 1,
+                }),
+              },
+            ],
+          });
+        }
+
+        await consumer.commitOffsets([
+          {
+            topic,
+            partition,
+            offset: (parseInt(message.offset) + 1).toString(),
+          },
+        ]);
       },
     });
   } catch (error: any) {

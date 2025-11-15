@@ -4,7 +4,7 @@ import TelegramBot, { type ConstructorOptions } from "node-telegram-bot-api";
 import fs from "fs";
 import path from "path";
 import { aws_s3_service_provider } from "../utils/aws_s3.js";
-import { get } from "http";
+
 
 config();
 

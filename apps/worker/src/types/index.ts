@@ -6,3 +6,20 @@ export type gmail_type = {
     message : string,
     subject : string
 }
+
+
+export type object_type_for_email ={  
+    sender_email : string
+    app_password : string
+    message :string
+    receiver_email : string
+    subject : string
+    stepes_run_id :number
+    stage: number
+}
+export type object_type_for_telegram = {
+    token :string,
+    chat_id : number,
+    message : object
+
+}
