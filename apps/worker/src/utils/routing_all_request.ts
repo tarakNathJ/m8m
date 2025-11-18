@@ -1,5 +1,7 @@
 import { mail_sender } from "../apps/gmail.app.js";
 import { send_message_on_telegram_bot } from "../apps/telegram.app.js";
+import { add_receivers_email_validation } from "../apps/webhook.app.js";
+
 import type {
   object_type_for_email,
   object_type_for_telegram,
@@ -10,6 +12,8 @@ class request_transfer_on_your_right_direction {
     app_name: string,
     data: object_type_for_email | object_type_for_telegram
   ) {
+
+    console.log( " chack point : ",app_name)
     if (app_name === "gmail") {
       const status = await new mail_sender().send_emiail_message(
         (data as object_type_for_email).sender_email,
@@ -22,16 +26,21 @@ class request_transfer_on_your_right_direction {
       );
       return status;
     } else if (app_name === "telegram") {
-        const status = await new send_message_on_telegram_bot().telegram_init_state(
-            (data as object_type_for_telegram).token,
-            (data as object_type_for_telegram).chat_id,
-            (data as object_type_for_telegram).message
+      const status =
+        await new send_message_on_telegram_bot().telegram_init_state(
+          (data as object_type_for_telegram).token,
+          (data as object_type_for_telegram).chat_id,
+          (data as object_type_for_telegram).message
         );
-        return status;
+      return status;
+    } else if (app_name === "receive_email") {
+      const status = await add_receivers_email_validation(
+        (data as object_type_for_email).stepes_run_id
+      );
+      return status;
     }
     return false;
   }
 }
 
-
-export { request_transfer_on_your_right_direction }
+export { request_transfer_on_your_right_direction };

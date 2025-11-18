@@ -1,7 +1,7 @@
 import type {
   gmail,
   telegram,
-  recerve_email,
+  receive_email,
   scheduler,
   form,
   webhook
@@ -41,7 +41,7 @@ class type_chack_for_steps_metadata {
     }
   }
 
-  is_recerve_email(obj: recerve_email): boolean {
+  is_recerve_email(obj: receive_email): boolean {
     if (
       typeof obj === "object" &&
       obj !== null &&

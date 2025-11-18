@@ -37,7 +37,7 @@ export type scheduler = {
   app_password: string;
 };
 
-export interface recerve_email {
+export interface receive_email {
   email: string;
   app_password: string;
 }

@@ -7,6 +7,7 @@ import { request_transfer_on_your_right_direction } from "./utils/routing_all_re
 import type {
   object_type_for_email,
   object_type_for_telegram,
+  receive_email_type,
 } from "./types/index.js";
 dotenv.config();
 
@@ -64,7 +65,8 @@ async function work_executer() {
           return;
         }
         const data = JSON.parse(message.value?.toString());
-
+        await new Promise((resolve, reject) => setTimeout(resolve, 6000));
+        // console.log(data);
         if (data.type == "MESSAGE_FROM_PROECSSOR") {
           // chack in our data base data are exist or not
           const db_data = await new database_service_provider().getdata(
@@ -83,6 +85,7 @@ async function work_executer() {
           let template:
             | object_type_for_email
             | object_type_for_telegram
+            | receive_email_type
             | null = null;
 
           // chack which type of work
@@ -110,6 +113,13 @@ async function work_executer() {
               };
               template = telegram_template;
               break;
+            case "receive_email":
+              const receive_email_template = {
+                stepes_run_id: data.run.stepes_run_id,
+              };
+              template = receive_email_template;
+
+              break;
             default:
               break;
           }
@@ -117,11 +127,15 @@ async function work_executer() {
           if (!template) {
             return;
           }
-          //
+
           await new request_transfer_on_your_right_direction().routing_all_request_on_right_direction(
             db_data.get_step_find_by_id_and_index.name,
+            //@ts-ignore
             template
           );
+
+          if (db_data.get_step_find_by_id_and_index.name == "receive_email")
+            return;
           // produce new message for next->target
           const get_producer = init_producer();
           await get_producer.connect();
@@ -156,9 +170,11 @@ async function work_executer() {
             console.log("no data found");
             return;
           }
+
           let template:
             | object_type_for_email
             | object_type_for_telegram
+            | receive_email_type
             | null = null;
 
           // chack which type of work
@@ -186,6 +202,13 @@ async function work_executer() {
               };
               template = telegram_template;
               break;
+            case "receive_email":
+              const receive_email_template = {
+                stepes_run_id: data.run.stepes_run_id,
+              };
+              template = receive_email_template;
+
+              break;
             default:
               break;
           }
@@ -196,8 +219,21 @@ async function work_executer() {
           //
           await new request_transfer_on_your_right_direction().routing_all_request_on_right_direction(
             db_data.get_step_find_by_id_and_index.name,
+            //@ts-ignore
             template
           );
+
+          if (db_data.get_step_find_by_id_and_index.name == "receive_email") {
+            await consumer.commitOffsets([
+              {
+                topic,
+                partition,
+                offset: (parseInt(message.offset) + 1).toString(),
+              },
+            ]);
+            await new Promise((resolve, reject) => setTimeout(resolve, 4000));
+            return;
+          }
           // produce new message for next->target
           const get_producer = init_producer();
           await get_producer.connect();
@@ -222,6 +258,7 @@ async function work_executer() {
             offset: (parseInt(message.offset) + 1).toString(),
           },
         ]);
+        await new Promise((resolve, reject) => setTimeout(resolve, 4000));
       },
     });
   } catch (error: any) {

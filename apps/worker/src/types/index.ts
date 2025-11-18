@@ -23,3 +23,7 @@ export type object_type_for_telegram = {
     message : object
 
 }
+
+export type receive_email_type = {
+    stepes_run_id : number
+}

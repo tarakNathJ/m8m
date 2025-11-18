@@ -111,7 +111,7 @@ export const create_step = async_handler(
       case "scheduler":
         status = new type_chack_for_steps_metadata().is_scheduler(meta_data);
         break;
-      case "recerve_email":
+      case "receive_email":
         status = new type_chack_for_steps_metadata().is_recerve_email(
           meta_data
         );

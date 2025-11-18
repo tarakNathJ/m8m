@@ -95,53 +95,58 @@ class receive_email {
 
   private async search_bd_this_email(data: data[]) {
     try {
-     const transaction = await prisma.$transaction(async (tx) => {
-         const find_all_email_data = await tx.reseve_email_validator.findMany({
-        where: {
-          message_id: {
-            in: data.map((x) => x.message_id),
+      const transaction = await prisma.$transaction(async (tx) => {
+        const find_all_email_data = await tx.reseve_email_validator.findMany({
+          where: {
+            message_id: {
+              in: data.map((x) => x.message_id),
+            },
+            email: {
+              in: data.map((x) => x.email),
+            },
+            status: schemaType.working_status.CREATE,
           },
-          email: {
-            in: data.map((x) => x.email),
+          select: {
+            id: true,
+            email: true,
+            message_id: true,
           },
-          status: schemaType.working_status.CREATE,
-        },
-        select: {
-          id: true,
-          email: true,
-          message_id: true,
-        },
+        });
+
+        const map2 = new Map(find_all_email_data.map((x) => [x.email, x]));
+
+        const result = data
+          .filter((x) => map2.has(x.email))
+          .map((x) => ({
+            ...x,
+            //@ts-ignore
+            id: map2.get(x.email).id,
+          }));
+
+        await tx.mail_template.createMany({
+          data: result.map((item) => ({
+            reseve_email_validator_id: item.id,
+            template: {
+              subject: item.subject,
+              body: item.body,
+              email: item.email,
+            },
+            create_at: new Date(),
+          })),
+          skipDuplicates: true,
+        });
+
+        return find_all_email_data;
       });
 
-      const map2 = new Map(find_all_email_data.map((x) => [x.email, x]));
-
-      const result = data
-        .filter((x) => map2.has(x.email))
-        .map((x) => ({
-          ...x,
-          //@ts-ignore
-          id: map2.get(x.email).id,
-        }));
-
-      await tx.mail_template.createMany({
-        data: result.map((item) => ({
-          reseve_email_validator_id: item.id,
-          template: {
-            subject: item.subject,
-            body: item.body,
-            email: item.email,
-          },
-          create_at: new Date(),
-        })),
-        skipDuplicates: true, 
-      });
-
-
-      return find_all_email_data;
-     });
+      
     } catch (error: any) {
       console.log(error.message);
       throw new Error(error.message);
     }
   }
 }
+
+
+
+export {receive_email}
