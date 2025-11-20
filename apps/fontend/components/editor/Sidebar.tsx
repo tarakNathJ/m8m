@@ -39,7 +39,8 @@ const Sidebar: React.FC = () => {
     e: React.DragEvent<HTMLDivElement>,
     nodeType: NodeType
   ) => {
-    e.dataTransfer.setData("application/reactflow", nodeType);
+    // @ts-ignore
+    e.dataTransfer.setData("application/reactflow", nodeType.app);
     e.dataTransfer.effectAllowed = "move";
   };
 
@@ -54,7 +55,7 @@ const Sidebar: React.FC = () => {
             draggable
             // FIX: Framer Motion's `onDragStart` type conflicts with the native `draggable`
             // attribute's event. Casting the event to `any` resolves the TypeScript error.
-            onDragStart={(e: any) => handleDragStart(e, data.app)}
+            onDragStart={(e: any) => handleDragStart(e, data)}
             whileHover={{
               scale: 1.05,
               backgroundColor: "rgba(58, 76, 104, 1)",
