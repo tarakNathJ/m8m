@@ -4,6 +4,8 @@ import { setView } from '../store/navigationSlice';
 import { logoutAndRedirect } from '../store/authSlice';
 import { RootState } from '../store/store';
 import { LayoutGrid, Workflow as WorkflowIcon, KeyRound, Settings, HelpCircle, LogOut } from 'lucide-react';
+import { Link ,useNavigate } from 'react-router-dom';
+
 
 interface NavLinkProps {
     icon: React.ReactNode;
@@ -12,12 +14,18 @@ interface NavLinkProps {
     onClick: () => void;
 }
 
-const NavLink: React.FC<NavLinkProps> = ({ icon, label, active, onClick }) => (
-    <button onClick={onClick} className={`flex items-center w-full gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${active ? 'bg-[#4295f1] text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white'}`}>
+const NavLink: React.FC<NavLinkProps> = ({ icon, label, active, onClick }) => {
+    console.log(active);
+    console.log(label);
+    console.log(onClick);
+    return(
+            <button onClick={onClick} className={`flex items-center w-full gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${active ? 'bg-[#4295f1] text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white'}`}>
         {icon}
-        <span>{label}</span>
+        <span><Link to={`/${label.toLowerCase() === 'overview' ? "dashboard" : "workflows"}`}>{label}</Link></span>
+        
     </button>
-);
+    )
+};
 
 interface DashboardSidebarProps {
     activeView: 'overview' | 'workflows';
@@ -27,6 +35,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ activeView }) => {
     const dispatch = useDispatch();
     const user = useSelector((state: RootState) => state.auth.user);
     const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : 'U';
+
+    const navigate = useNavigate();
 
     return (
         <aside className="w-60 flex flex-col bg-[#131517] p-4 border-r border-gray-800 flex-shrink-0">
@@ -38,8 +48,8 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ activeView }) => {
                 <div>
                     <h2 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Main</h2>
                     <div className="space-y-1">
-                        <NavLink icon={<LayoutGrid size={18}/>} label="Overview" active={activeView === 'overview'} onClick={() => dispatch(setView({ view: 'dashboard' }))} />
-                        <NavLink icon={<WorkflowIcon size={18}/>} label="Workflows" active={activeView === 'workflows'} onClick={() => dispatch(setView({ view: 'workflows' }))} />
+                        <NavLink icon={<LayoutGrid size={18}/>} label="Overview" active={activeView === 'overview'} onClick={() => navigate("/dashboard")} />
+                        <NavLink icon={<WorkflowIcon size={18}/>} label="Workflows" active={activeView === 'workflows'} onClick={() => navigate("/workflows")} />
                     </div>
                     <h2 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-6 mb-2">Resources</h2>
                     <div className="space-y-1">

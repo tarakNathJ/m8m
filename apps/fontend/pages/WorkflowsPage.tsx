@@ -40,18 +40,37 @@ const Dropdown = ({ trigger, children }: { trigger: React.ReactNode, children: R
     );
 };
 
+const WorkflowCard = ({
+    wf,
+    onEdit,
+    onDelete,
+    onDuplicate
+}: {
+    wf: Workflow,
+    onEdit: (id: string) => void,
+    onDelete: (id: string) => void,
+    onDuplicate: (id: string) => void
+}) => {
 
-const WorkflowCard = ({ wf, onEdit, onDelete, onDuplicate }: { wf: Workflow, onEdit: (id: string) => void, onDelete: (id: string) => void, onDuplicate: (id: string) => void }) => {
-    
     const getTriggerInfo = () => {
-        const triggerNode = Object.values(wf.nodes).find(node => node.type === NodeType.Trigger);
-        if (triggerNode || Object.values(wf.nodes).some(n => n.type === NodeType.HttpRequest)) {
-            if (wf.name.toLowerCase().includes('email')) return { tag: 'RESERVE_EMAIL', color: 'text-orange-400' };
+        const triggerNode = Object.values(wf.nodes || {}).find(node => node.type === NodeType.Trigger);
+
+        if (triggerNode || Object.values(wf.nodes || {}).some(n => n.type === NodeType.HttpRequest)) {
+            if (wf.name.toLowerCase().includes('email')) 
+                return { tag: 'RESERVE_EMAIL', color: 'text-orange-400' };
+
             return { tag: 'WEBHOOK', color: 'text-red-400' };
         }
+
         return null;
-    }
+    };
+
     const triggerInfo = getTriggerInfo();
+
+    // Prevent Invalid Date error
+    const formattedDate = wf.create_at
+        ? format(new Date(wf.create_at), "yyyy-MM-dd HH:mm")
+        : "No date";
 
     return (
         <motion.div
@@ -63,45 +82,66 @@ const WorkflowCard = ({ wf, onEdit, onDelete, onDuplicate }: { wf: Workflow, onE
         >
             <div className="flex justify-between items-start">
                 <div>
-                    <h3 className="font-bold text-lg text-white group-hover:text-[#81b8f5] transition-colors">{wf.name}</h3>
+                    {/* Workflow Name */}
+                    <h3 className="font-bold text-lg text-white group-hover:text-[#81b8f5] transition-colors">
+                        {wf.name}
+                    </h3>
+
+                    {/* Date + Tag */}
                     <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                        <span>{format(new Date(wf.updated), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")}</span>
+                        <span>{formattedDate}</span>
                         {triggerInfo && (
                             <>
                                 <span>&middot;</span>
-                                <span className={`font-mono font-bold ${triggerInfo.color}`}>{triggerInfo.tag}</span>
+                                <span className={`font-mono font-bold ${triggerInfo.color}`}>
+                                    {triggerInfo.tag}
+                                </span>
                             </>
                         )}
                     </div>
+
+                    {/* Step counts */}
+                    <div className="text-xs text-gray-400 mt-2 flex gap-4">
+                        
+                        <span>Steps: {wf._count ?.stepes ?? 0}</span>
+                        <span>Runs: {wf._count?.stepes_runs ?? 0}</span>
+                    </div>
+
                     {triggerInfo?.tag === 'WEBHOOK' && (
-                        <p className="font-mono text-xs text-gray-400 mt-2 bg-[#1c1e20] inline-block px-2 py-1 rounded">http://localhost:3000/api/hooks/1/{wf.id.substring(0,4)}</p>
+                        <p className="font-mono text-xs text-gray-400 mt-2 bg-[#1c1e20] inline-block px-2 py-1 rounded">
+                        </p>
                     )}
                 </div>
+
+                {/* Buttons */}
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button className="p-2 rounded-lg text-gray-400 hover:bg-green-500/20 hover:text-green-400 transition-all">
-                        <Play size={18}/>
+                        <Play size={18} />
                     </button>
+
                     <Dropdown
                         trigger={
                             <button className="p-2 rounded-lg text-gray-400 hover:bg-[#4295f1]/20 hover:text-[#81b8f5] transition-all">
-                                <MoreVertical size={18}/>
+                                <MoreVertical size={18} />
                             </button>
                         }
                     >
-                         <button onClick={() => onEdit(wf.id)} className="w-full text-left flex items-center gap-2 px-3 py-2 hover:bg-white/5">Edit</button>
-                         <button onClick={() => onDuplicate(wf.id)} className="w-full text-left flex items-center gap-2 px-3 py-2 hover:bg-white/5"><Copy size={14}/> Duplicate</button>
-                         <button onClick={() => onDelete(wf.id)} className="w-full text-left flex items-center gap-2 px-3 py-2 text-red-400 hover:bg-white/5"><Trash2 size={14}/> Delete</button>
+                        <button onClick={() => onEdit(wf.id)} className="w-full text-left flex items-center gap-2 px-3 py-2 hover:bg-white/5">Edit</button>
+                        <button onClick={() => onDuplicate(wf.id)} className="w-full text-left flex items-center gap-2 px-3 py-2 hover:bg-white/5"><Copy size={14}/> Duplicate</button>
+                        <button onClick={() => onDelete(wf.id)} className="w-full text-left flex items-center gap-2 px-3 py-2 text-red-400 hover:bg-white/5"><Trash2 size={14}/> Delete</button>
                     </Dropdown>
                 </div>
             </div>
         </motion.div>
     );
-}
+};
+
 
 
 const WorkflowsPage: React.FC = () => {
     const dispatch = useDispatch();
-    const allWorkflows = useSelector((state: RootState) => state.workflows.workflows);
+    const allWorkflows = useSelector((state: RootState) => state.workflows.data);
+    console.log("data ss : -",allWorkflows);
     const user = useSelector((state: RootState) => state.auth.user);
     const [newWorkflowName, setNewWorkflowName] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -123,11 +163,11 @@ const WorkflowsPage: React.FC = () => {
     const handleDelete = (workflowId: string) => dispatch(deleteWorkflow(workflowId));
     const handleDuplicate = (workflowId: string) => dispatch(duplicateWorkflow(workflowId));
     
-    const filteredWorkflows = useMemo(() => {
-        return allWorkflows
-            .filter(wf => wf.name.toLowerCase().includes(searchTerm.toLowerCase()))
-            .sort((a, b) => new Date(b.updated).getTime() - new Date(a.updated).getTime());
-    }, [allWorkflows, searchTerm]);
+    // const filteredWorkflows = useMemo(() => {
+    //     return allWorkflows
+    //         .filter(wf => wf.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    //         .sort((a, b) => new Date(b.updated).getTime() - new Date(a.updated).getTime());
+    // }, [allWorkflows, searchTerm]);
 
     const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : 'U';
 
@@ -182,17 +222,18 @@ const WorkflowsPage: React.FC = () => {
                 {/* Workflow List */}
                 <div className="flex-1 space-y-4 overflow-y-auto pr-2">
                     <AnimatePresence>
-                        {filteredWorkflows.map(wf => (
+                        {allWorkflows.map((wf :any) => (
                             <WorkflowCard key={wf.id} wf={wf} onEdit={handleEdit} onDelete={handleDelete} onDuplicate={handleDuplicate}/>
+                           
                         ))}
                     </AnimatePresence>
-                    {filteredWorkflows.length === 0 && (
+                    {/* {filteredWorkflows.length === 0 && (
                         <div className="text-center py-16">
                              <WorkflowIcon className="mx-auto w-16 h-16 text-gray-600"/>
                             <h3 className="mt-4 text-xl font-semibold text-white">No Workflows Found</h3>
                             <p className="mt-2 text-gray-400">Get started by creating a new workflow.</p>
                         </div>
-                    )}
+                    )} */}
                 </div>
 
             </main>

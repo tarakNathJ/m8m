@@ -1,26 +1,36 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { setView } from '../store/navigationSlice';
-import { setUser } from '../store/authSlice';
-import { getUsers } from '../utils/localStorage';
-import { motion } from 'framer-motion';
-
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { setView } from "../store/navigationSlice";
+import { setUser } from "../store/authSlice";
+import { getUsers } from "../utils/localStorage";
+import { motion } from "framer-motion";
+import {api_instance} from "@/hooks/api.js";
+import {useNavigate} from "react-router-dom"
 const LoginPage: React.FC = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const users = getUsers();
-    const user = users.find(u => u.email === email && u.password === password);
+    console.log(email, password);
+    try {
+      console.log("here");
+      const responce = await api_instance.post("/api/auth/login", {
+        email: email,
+        password: password,
+      });
 
-    if (user) {
-      dispatch(setUser({ id: user.id, email: user.email }));
-      dispatch(setView({ view: 'dashboard' }));
-    } else {
-      setError('Invalid email or password.');
+      console.log(responce.data.data.access_token);
+
+      localStorage.setItem("access_token", responce.data.data.access_token);
+      navigate("/dashboard");
+
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
   };
 
@@ -38,7 +48,12 @@ const LoginPage: React.FC = () => {
         <form className="space-y-6" onSubmit={handleLogin}>
           {error && <p className="text-red-400 text-center">{error}</p>}
           <div>
-            <label htmlFor="email" className="text-sm font-medium text-gray-300 block mb-2">Email address</label>
+            <label
+              htmlFor="email"
+              className="text-sm font-medium text-gray-300 block mb-2"
+            >
+              Email address
+            </label>
             <input
               id="email"
               type="email"
@@ -49,7 +64,12 @@ const LoginPage: React.FC = () => {
             />
           </div>
           <div>
-            <label htmlFor="password" className="text-sm font-medium text-gray-300 block mb-2">Password</label>
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-gray-300 block mb-2"
+            >
+              Password
+            </label>
             <input
               id="password"
               type="password"
@@ -69,8 +89,11 @@ const LoginPage: React.FC = () => {
           </motion.button>
         </form>
         <p className="text-sm text-center text-gray-400">
-          Don't have an account?{' '}
-          <button onClick={() => dispatch(setView({ view: 'signup' }))} className="font-medium text-[#81b8f5] hover:underline">
+          Don't have an account?{" "}
+          <button
+            onClick={() => dispatch(setView({ view: "signup" }))}
+            className="font-medium text-[#81b8f5] hover:underline"
+          >
             Sign up
           </button>
         </p>

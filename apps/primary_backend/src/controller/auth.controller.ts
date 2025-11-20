@@ -53,16 +53,35 @@ export const sign_up_controller = async_handler(async (req, res) => {
       //@ts-ignore
       create_at: new Date(),
     },
+    select: {
+      email: true,
+    },
   });
-
   if (!add_new_entry_in_our_db) {
     throw new api_error(400, "database entry  failed  try again");
+  }
+  const token = {
+    email: add_new_entry_in_our_db.email,
+  };
+
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new api_error(400, " env not exist ");
+  }
+
+  const access_token = JWT.sign(token, secret, { expiresIn: "1d" });
+  if (!access_token) {
+    throw new api_error(400, "  failed to create  access token  ");
   }
 
   return res
     .status(201)
     .json(
-      new api_responce(201, add_new_entry_in_our_db, " sign up success fully ")
+      new api_responce(
+        201,
+        { access_token, email: add_new_entry_in_our_db.email },
+        " sign up success fully "
+      )
     );
 });
 

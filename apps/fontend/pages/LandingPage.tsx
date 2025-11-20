@@ -3,9 +3,14 @@ import { useDispatch } from 'react-redux';
 import { setView } from '../store/navigationSlice';
 import { motion } from 'framer-motion';
 import { ArrowRight, Zap, Code, Share2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 
 const LandingPage: React.FC = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+
+
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gray-900 flex flex-col items-center justify-center p-4">
@@ -29,7 +34,7 @@ const LandingPage: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => dispatch(setView({ view: 'signup' }))}
+            onClick={() => navigate('/signup')}
             className="group flex items-center justify-center gap-2 px-8 py-3 bg-gradient-to-r from-[#4295f1] to-[#6cacf4] text-white font-semibold rounded-lg shadow-lg hover:shadow-[#4295f1]/50 transition-all duration-300"
           >
             Get Started
@@ -38,7 +43,7 @@ const LandingPage: React.FC = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => dispatch(setView({ view: 'login' }))}
+            onClick={() => navigate('/login')}
             className="px-8 py-3 bg-white/10 text-white font-semibold rounded-lg border border-white/20 hover:bg-white/20 transition-colors duration-300"
           >
             Log In

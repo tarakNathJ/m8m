@@ -1,37 +1,39 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { setView } from '../store/navigationSlice';
-import { setUser } from '../store/authSlice';
-import { getUsers, saveUsers } from '../utils/localStorage';
-import { generateId } from '../utils/id';
-import { motion } from 'framer-motion';
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { setView } from "../store/navigationSlice";
+
+import { motion } from "framer-motion";
+import { api_instance } from "@/hooks/api";
+import { useNavigate } from "react-router-dom";
 
 const SignupPage: React.FC = () => {
   const dispatch = useDispatch();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async(e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError("Passwords do not match.");
       return;
     }
+    try {
+      const responce = await api_instance.post("/api/auth/signup", {
+        name: name,
+        email: email,
+        password: password,
+      });
 
-    const users = getUsers();
-    if (users.some(u => u.email === email)) {
-      setError('An account with this email already exists.');
-      return;
+      localStorage.setItem("access_token", responce.data.data.access_token);
+      navigate("/dashboard");
+    } catch (error) {
+      console.log(error);
+      throw error;
     }
-
-    const newUser = { id: generateId(), email, password };
-    const updatedUsers = [...users, newUser];
-    saveUsers(updatedUsers);
-
-    dispatch(setUser({ id: newUser.id, email: newUser.email }));
-    dispatch(setView({ view: 'dashboard' }));
   };
 
   return (
@@ -48,7 +50,28 @@ const SignupPage: React.FC = () => {
         <form className="space-y-6" onSubmit={handleSignup}>
           {error && <p className="text-red-400 text-center">{error}</p>}
           <div>
-            <label htmlFor="email" className="text-sm font-medium text-gray-300 block mb-2">Email address</label>
+            <label
+              htmlFor="name"
+              className="text-sm font-medium text-gray-300 block mb-2"
+            >
+              Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="w-full px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#4295f1]"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="email"
+              className="text-sm font-medium text-gray-300 block mb-2"
+            >
+              Email address
+            </label>
             <input
               id="email"
               type="email"
@@ -59,7 +82,12 @@ const SignupPage: React.FC = () => {
             />
           </div>
           <div>
-            <label htmlFor="password"  className="text-sm font-medium text-gray-300 block mb-2">Password</label>
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-gray-300 block mb-2"
+            >
+              Password
+            </label>
             <input
               id="password"
               type="password"
@@ -70,7 +98,12 @@ const SignupPage: React.FC = () => {
             />
           </div>
           <div>
-             <label htmlFor="confirm-password"  className="text-sm font-medium text-gray-300 block mb-2">Confirm Password</label>
+            <label
+              htmlFor="confirm-password"
+              className="text-sm font-medium text-gray-300 block mb-2"
+            >
+              Confirm Password
+            </label>
             <input
               id="confirm-password"
               type="password"
@@ -90,8 +123,11 @@ const SignupPage: React.FC = () => {
           </motion.button>
         </form>
         <p className="text-sm text-center text-gray-400">
-          Already have an account?{' '}
-          <button onClick={() => dispatch(setView({ view: 'login' }))} className="font-medium text-[#81b8f5] hover:underline">
+          Already have an account?{" "}
+          <button
+            onClick={() => dispatch(setView({ view: "login" }))}
+            className="font-medium text-[#81b8f5] hover:underline"
+          >
             Log in
           </button>
         </p>
