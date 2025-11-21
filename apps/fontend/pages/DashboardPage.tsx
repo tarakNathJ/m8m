@@ -220,6 +220,8 @@ const DashboardPage: React.FC = () => {
     console.log("responce data : ", responce.data.data);
 
     if (responce.data.success) {
+
+      console.log(responce)
       sessionStorage.setItem(
         type_of_step,
         JSON.stringify(responce.data.data.get_all_type_of_step)

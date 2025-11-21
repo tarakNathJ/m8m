@@ -21,7 +21,7 @@ export interface gmail {
   message: string;
 }
 export interface telegram {
-  chatId: number;
+  chatId: string;
   token: string;
 }
 

@@ -1,21 +1,19 @@
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Edge } from '../../types';
-import { RootState } from '../../store/store';
+import { useDispatch } from 'react-redux';
+import { Edge, Node } from '../../types';
 import { motion } from 'framer-motion';
 import { deleteEdge } from '../../store/editorSlice';
 import { X } from 'lucide-react';
 
 interface EdgeProps {
   edge: Edge;
+  fromNode: Node;
+  toNode: Node;
 }
 
-const EdgeComponent: React.FC<EdgeProps> = ({ edge }) => {
+const EdgeComponent: React.FC<EdgeProps> = React.memo(({ edge, fromNode, toNode }) => {
   const dispatch = useDispatch();
   const [isHovered, setIsHovered] = useState(false);
-  const { from, to } = edge;
-  const fromNode = useSelector((state: RootState) => state.editor.nodes[from]);
-  const toNode = useSelector((state: RootState) => state.editor.nodes[to]);
 
   if (!fromNode || !toNode) {
     return null;
@@ -32,8 +30,8 @@ const EdgeComponent: React.FC<EdgeProps> = ({ edge }) => {
   const dx = endX - startX;
   const path = `M ${startX} ${startY} C ${startX + dx * 0.5} ${startY}, ${endX - dx * 0.5} ${endY}, ${endX} ${endY}`;
 
-  const midX = (startX + endX) / 2 + (dx * 0.5 * 0.75 - dx * 0.5 * 0.75) / 2;
-  const midY = startY + (endY - startY) * 0.5;
+  const midX = (startX + endX) / 2;
+  const midY = (startY + endY) / 2;
 
 
   return (
@@ -62,6 +60,6 @@ const EdgeComponent: React.FC<EdgeProps> = ({ edge }) => {
       )}
     </g>
   );
-};
+});
 
 export default EdgeComponent;

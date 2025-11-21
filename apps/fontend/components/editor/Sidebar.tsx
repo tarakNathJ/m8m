@@ -3,33 +3,7 @@ import { NodeType } from "../../types";
 import { motion } from "framer-motion";
 import { Zap, ArrowRightLeft, Code, Settings, Clock } from "lucide-react";
 
-const nodeTypes = [
-  {
-    type: NodeType.Trigger,
-    icon: <Zap className="w-5 h-5 text-yellow-400" />,
-    color: "border-yellow-400",
-  },
-  {
-    type: NodeType.HttpRequest,
-    icon: <ArrowRightLeft className="w-5 h-5 text-sky-400" />,
-    color: "border-sky-400",
-  },
-  {
-    type: NodeType.Function,
-    icon: <Code className="w-5 h-5 text-emerald-400" />,
-    color: "border-emerald-400",
-  },
-  {
-    type: NodeType.Set,
-    icon: <Settings className="w-5 h-5 text-purple-400" />,
-    color: "border-purple-400",
-  },
-  {
-    type: NodeType.Delay,
-    icon: <Clock className="w-5 h-5 text-orange-400" />,
-    color: "border-orange-400",
-  },
-];
+
 
 const Sidebar: React.FC = () => {
   const type_of_step = "type_of_step";

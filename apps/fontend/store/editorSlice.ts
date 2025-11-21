@@ -13,6 +13,7 @@ export interface EditorState {
 
   selectedNodeId: string | null;
   connectMode: { fromNodeId: string } | null;
+  nodeIdCounter: number;
 }
 
 const initialState: EditorState = {
@@ -23,7 +24,8 @@ const initialState: EditorState = {
   selectedNodeId: null,
   connectMode: null,
   source: '',
-  type: ''
+  type: '',
+  nodeIdCounter: 0,
 };
 
 
@@ -40,12 +42,17 @@ const editorSlice = createSlice({
       state.edges = action.payload.edges;
       state.selectedNodeId = null;
       state.connectMode = null;
+
+      const nodeIds = Object.keys(action.payload.nodes).map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+      const maxId = nodeIds.length > 0 ? Math.max(...nodeIds) : -1;
+      state.nodeIdCounter = maxId + 1;
     },
     setWorkflowName: (state, action: PayloadAction<string>) => {
       state.workflowName = action.payload;
     },
     addNode: (state, action: PayloadAction<{ type: NodeType; x: number; y: number }>) => {
-      const id = generateId();
+      const id = String(state.nodeIdCounter);
+      state.nodeIdCounter++;
       state.nodes[id] = {
         id,
         type: action.payload.type,

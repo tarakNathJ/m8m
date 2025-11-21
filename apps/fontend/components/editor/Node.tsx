@@ -28,7 +28,7 @@ const nodeColors: Record<NodeType, string> = {
     [NodeType.Delay]: 'border-orange-400',
 };
 
-const NodeComponent: React.FC<NodeProps> = ({ node, onMove }) => {
+const NodeComponent: React.FC<NodeProps> = React.memo(({ node, onMove }) => {
   const dispatch = useDispatch();
   const { selectedNodeId, connectMode } = useSelector((state: RootState) => state.editor);
   const isSelected = selectedNodeId === node.id;
@@ -48,13 +48,14 @@ const NodeComponent: React.FC<NodeProps> = ({ node, onMove }) => {
       drag
       dragMomentum={false}
       onDragEnd={(_, info) => onMove(node.id, node.x + info.offset.x, node.y + info.offset.y)}
-      initial={{ x: node.x, y: node.y, scale: 0.5, opacity: 0 }}
+      initial={{ scale: 0.5, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       exit={{ scale: 0.5, opacity: 0 }}
-      layout
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
       className={`group absolute w-48 h-16 p-3 rounded-lg shadow-lg cursor-pointer flex items-center gap-3 border-2 ${nodeColors[node.type]} ${isSelected ? 'shadow-[#4295f1]/50 ring-2 ring-[#6cacf4]' : 'shadow-black/50'}`}
       style={{
+        left: node.x,
+        top: node.y,
         backgroundColor: '#2d3748', // bg-gray-700
       }}
       onClick={handleNodeClick}
@@ -78,6 +79,6 @@ const NodeComponent: React.FC<NodeProps> = ({ node, onMove }) => {
       </motion.button>
     </motion.div>
   );
-};
+});
 
 export default NodeComponent;
