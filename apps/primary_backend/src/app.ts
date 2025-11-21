@@ -3,6 +3,7 @@ import type{ Express} from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import routers from "./router/index.route.js";
+import { metrix_handler } from "@repo/handler"
 
 
 
@@ -18,6 +19,7 @@ class express_app {
         this.app.use(express.json())
         this.app.use(cookieParser())
         this.app.use("/api/auth",routers);
+        this.app.get("/metrics",metrix_handler)
     }
 }
 

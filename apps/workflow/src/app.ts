@@ -2,6 +2,7 @@ import express from "express"
 import cors from "cors"
 import bodyParser from "body-parser"
 import router from "./router/index.route.js"
+import { metrix_handler } from "@repo/handler"
 
 
 class express_server {
@@ -13,6 +14,7 @@ class express_server {
         this.app.use(express.json())
         this.app.use(bodyParser.json())
         this.app.use("/api/workflow",router);
+        this.app.get("/metrics",metrix_handler)
     }
 }
 
