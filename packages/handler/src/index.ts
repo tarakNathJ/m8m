@@ -60,7 +60,16 @@ class api_error extends Error {
 }
 
 // metrix collect
-// Create a dedicated registry for server apps
+
+const req_res_time = new promClient.Histogram({
+  name:"http_express_req_res_time",
+  help:"this tells how much time is taken by rreq and res",
+  labelNames: ["method","route","status_code"],
+  buckets: [ 1 ,30,50, 120, 200 ,400, 500, 800 ,1000, 2000]
+});
+
+
+
 const server_register = new promClient.Registry();
 const collectDefaultMetrics = promClient.collectDefaultMetrics;
 collectDefaultMetrics({ register: promClient.register });
@@ -122,4 +131,5 @@ export {
   metrix_handler,
   create_job_metrics,
   server_register,
+  req_res_time
 };

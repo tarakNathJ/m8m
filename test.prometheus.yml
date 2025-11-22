@@ -1,0 +1,25 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+
+
+  - job_name: 'primary-backend'
+    static_configs:
+      - targets: ['privare-address:3000']
+
+
+  - job_name: 'workflow-service'
+    static_configs:
+      - targets: ['privare-address:3004']
+
+
+  - job_name: 'pushgateway'
+    honor_labels: true   
+    static_configs:
+      - targets: ["privare-address:9091"]
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

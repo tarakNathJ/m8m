@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+
+  # --------------------------------------------------------
+  # 1. Pushgateway (for workers, cron jobs, processors)
+  # --------------------------------------------------------
+  pushgateway:
+    image: prom/pushgateway
+    container_name: pushgateway
+    ports:
+      - "9091:9091"
+
+  # --------------------------------------------------------
+  # 2. Prometheus (pulls from your host services + Pushgateway)
+  # --------------------------------------------------------
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./.prometheus_config.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - pushgateway
+
+  # --------------------------------------------------------
+  # 3. Grafana (dashboards)
+  # --------------------------------------------------------
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
