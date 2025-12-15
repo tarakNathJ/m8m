@@ -105,6 +105,8 @@ class type_chack_for_steps_metadata {
 
   // webhook
   is_webhook(obj: webhook): boolean {
+
+    console.log(obj)
     // chack this  object are not null
    if (typeof obj === "object" && obj !== null && "METHOD" in obj && typeof obj .METHOD === "string") {
       return true;

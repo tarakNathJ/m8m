@@ -28,6 +28,7 @@ export interface Edge {
 }
 
 export interface Workflow {
+  stepes: any;
   // create_at: string | number | Date;
   create_at: any;
   id: string;

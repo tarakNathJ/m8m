@@ -163,11 +163,6 @@ const WorkflowsPage: React.FC = () => {
     const handleDelete = (workflowId: string) => dispatch(deleteWorkflow(workflowId));
     const handleDuplicate = (workflowId: string) => dispatch(duplicateWorkflow(workflowId));
     
-    // const filteredWorkflows = useMemo(() => {
-    //     return allWorkflows
-    //         .filter(wf => wf.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    //         .sort((a, b) => new Date(b.updated).getTime() - new Date(a.updated).getTime());
-    // }, [allWorkflows, searchTerm]);
 
     const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : 'U';
 
@@ -227,13 +222,7 @@ const WorkflowsPage: React.FC = () => {
                            
                         ))}
                     </AnimatePresence>
-                    {/* {filteredWorkflows.length === 0 && (
-                        <div className="text-center py-16">
-                             <WorkflowIcon className="mx-auto w-16 h-16 text-gray-600"/>
-                            <h3 className="mt-4 text-xl font-semibold text-white">No Workflows Found</h3>
-                            <p className="mt-2 text-gray-400">Get started by creating a new workflow.</p>
-                        </div>
-                    )} */}
+                   
                 </div>
 
             </main>

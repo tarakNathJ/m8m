@@ -125,7 +125,7 @@ const SignupPage: React.FC = () => {
         <p className="text-sm text-center text-gray-400">
           Already have an account?{" "}
           <button
-            onClick={() => dispatch(setView({ view: "login" }))}
+            onClick={() => navigate("/login")}
             className="font-medium text-[#81b8f5] hover:underline"
           >
             Log in

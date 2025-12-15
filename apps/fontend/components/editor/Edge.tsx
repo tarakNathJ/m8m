@@ -49,14 +49,13 @@ const EdgeComponent: React.FC<EdgeProps> = React.memo(({ edge, fromNode, toNode 
        <path d={path} fill="none" stroke="transparent" strokeWidth="20" className="cursor-pointer" onClick={() => dispatch(deleteEdge(edge.id))} />
       
       {isHovered && (
-        <foreignObject x={midX - 12} y={midY - 12} width="24" height="24">
+        // <foreignObject x={midX - 12} y={midY - 12} width="24" height="24">
             <button
               onClick={() => dispatch(deleteEdge(edge.id))}
               className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white hover:bg-red-600"
             >
               <X size={16} />
             </button>
-        </foreignObject>
       )}
     </g>
   );

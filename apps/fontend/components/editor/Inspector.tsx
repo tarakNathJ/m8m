@@ -6,6 +6,7 @@ import { updateNode, deleteNode } from "../../store/editorSlice";
 import { Trash2, Save } from "lucide-react";
 import { Node } from "../../types";
 import { api_init } from "@/hooks/api";
+import { toast } from "sonner";
 
 const Inspector: React.FC = () => {
   const dispatch = useDispatch();
@@ -81,32 +82,30 @@ const Inspector: React.FC = () => {
     };
 
     try {
+     
       const responce = await api_init.post("/api/workflow/create-step", {
-        name: (type_of__step as any).name,
+        name: found.name,
         index: node,
         workflow_id: JSON.parse(sessionStorage.getItem("workflow_id")),
-        typeofstap_id: (type_of__step as any).id,
+        typeofstap_id: found.id,
         meta_data: fieldValues,
       });
 
-      if(responce.data.data.success)
-      console.log(responce);
+    
+      if (responce.data.success) {
+        toast(`save node : ${(type_of__step as any).name}`, {
+          description: responce.data.message,
+        });
+      }
+
     } catch (error: any) {
       console.log(error);
-      throw new Error("Invalid JSON in sessionStorage[type_of_step]");
+      toast(`node save failed : ${(type_of__step as any).name}`, {
+        description: error.message,
+      });
+     
     }
-    // console.log(
-    //   "updatedNodeData : ",
-    //   fieldValues,
-    //   "your node id : ",
-    //   node,
-    //   "workflow id :",
-    //   JSON.parse(sessionStorage.getItem("workflow_id")),
-    //   "step type : ",
-    //   type_of__step.id
-    // );
-
-    // dispatch(updateNode({ id: selectedNodeId, data: updatedNodeData }));
+   
   };
 
   const handleDelete = () => {
@@ -159,8 +158,11 @@ const Inspector: React.FC = () => {
                   key={index}
                   label={item.label}
                   value={fieldValues[item.label] ?? ""}
-                  workflow_id  = {JSON.parse(sessionStorage.getItem("workflow_id"))}
-                  user_id = {JSON.parse(sessionStorage.getItem("user_id"))}
+                  //@ts-ignore
+                  workflow_id={JSON.parse(
+                    sessionStorage.getItem("workflow_id")
+                  )}
+                  user_id={JSON.parse(sessionStorage.getItem("user_id"))}
                   onChange={(v) => handleFieldChange(item.label, v)}
                 />
               );
@@ -204,7 +206,7 @@ const Inspector: React.FC = () => {
 const InputField = ({
   label,
   value,
-  workflow_id ,
+  workflow_id,
   user_id,
   onChange,
 }: {
@@ -221,7 +223,7 @@ const InputField = ({
       <input
         type={label === "email" ? "email" : "text"}
         placeholder={value ?? ""} // <= always a string
-        value={label === "URL"?`${import.meta.env.VITE_API_URL2}/${workflow_id}/${user_id}`:""}
+        value={value ?? ""}
         onChange={(e) => onChange(e.target.value)}
         className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#4295f1]"
       />

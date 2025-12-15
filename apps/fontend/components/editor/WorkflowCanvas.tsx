@@ -1,289 +1,561 @@
-import React, { useRef, useCallback, useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../../store/store";
-import { addNode, moveNode, loadWorkflow } from "../../store/editorSlice";
-import {NodeComponent} from "./NodeComponent";
-import EdgeComponent from "./Edge";
-import { NodeType, Node } from "../../types";
+// import React, { useCallback, useMemo } from "react";
+// import { useDispatch, useSelector } from "react-redux";
+// import { RootState } from "../../store/store";
+// import {
+//   addNode,
+//   updateNode,
+//   addEdge as addEdgeRedux,
+//   setSelectedNodeId,
+// } from "../../store/editorSlice.js";
 
-import ReactFlow, {
-  Node as node,
-  Edge,
-  addEdge,
-  Connection,
-  useNodesState,
-  useEdgesState,
+// import {
+//   ReactFlow,
+//   Background,
+//   Controls,
+//   MiniMap,
+//   BackgroundVariant,
+//   Handle,
+//   Position,
+//   type Node as RFNode,
+//   type Edge as RFEdge,
+//   type NodeChange,
+//   type EdgeChange,
+//   type Connection,
+//   type NodeProps,
+//   type NodeTypes,
+//   type EdgeTypes,
+// } from "@xyflow/react";
+// // setSelectedNodeId
+
+// import "@xyflow/react/dist/style.css";
+// import CustomEdge from "./Edge";
+
+// /* ======================================================
+//    Custom Node
+// ====================================================== */
+// const NodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
+//   return (
+//     <div
+//       style={{
+//         padding: 12,
+//         borderRadius: 8,
+//         border: selected ? "2px solid #60a5fa" : "1px solid #ccc",
+//         background: "#1f2937",
+//         color: "white",
+//         minWidth: 140,
+//         textAlign: "center",
+//         position: "relative",
+//       }}
+//     >
+//       {/* Target handle (top) */}
+//       <Handle type="target" position={Position.Top} />
+//       {data.label as string}
+//       {/* Source handle (bottom) */}
+//       <Handle type="source" position={Position.Bottom} />
+//     </div>
+//   );
+// };
+
+// /* ======================================================
+//    Node & Edge Types
+// ====================================================== */
+// const nodeTypes: NodeTypes = {
+//   customNode: NodeComponent,
+// };
+
+// const edgeTypes: EdgeTypes = {
+//   customEdge: CustomEdge as React.ComponentType<any>,
+// };
+
+// /* ======================================================
+//    Helpers: Convert Redux → React Flow
+// ====================================================== */
+
+// function mapNodes(
+//   nodes: Record<string, any>,
+//   selectedNodeId: string | null
+// ): RFNode[] {
+//   return Object.values(nodes).map((n: any) => ({
+//     id: n.id,
+//     type: "customNode",
+//     position: { x: n.x ?? 0, y: n.y ?? 0 },
+//     selected: n.id === selectedNodeId, // ⭐ IMPORTANT
+//     data: {
+//       label: n.label ?? n.type ?? "Node",
+//     },
+//   }));
+// }
+// function mapEdges(edges: any[]): RFEdge[] {
+//   return edges.map((e) => ({
+//     id: e.id,
+//     source: e.from,
+//     target: e.to,
+//   }));
+// }
+
+// /* ======================================================
+//    Workflow Canvas
+// ====================================================== */
+// const WorkflowCanvas: React.FC = () => {
+//   const dispatch = useDispatch();
+//   // const { nodes, edges } = useSelector((state: RootState) => state.editor);
+
+//   const { nodes, edges, selectedNodeId } = useSelector(
+//     (state: RootState) => state.editor
+//   );
+//   // @ts-ignore
+//   // const rfNodes = useMemo(() => mapNodes(nodes), [nodes]);
+//   const rfEdges = useMemo(() => mapEdges(edges), [edges]);
+//   const rfNodes = useMemo(
+//     () => mapNodes(nodes, selectedNodeId),
+//     [nodes, selectedNodeId]
+//   );
+
+//   const onPaneClick = useCallback(() => {
+//     dispatch(setSelectedNodeId(null));
+//   }, [dispatch]);
+
+//   /* ---------------- Handlers ---------------- */
+
+//   const onNodesChange = useCallback(
+//     (changes: NodeChange[]) => {
+//       changes.forEach((change) => {
+//         if (change.type === "position" && change.position) {
+//           dispatch(
+//             updateNode({
+//               id: change.id,
+//               data: {
+//                 x: change.position.x,
+//                 y: change.position.y,
+//               },
+//             })
+//           );
+//         }
+
+//         if (change.type === "select") {
+//           dispatch(setSelectedNodeId(change.selected ? change.id : null));
+//         }
+//       });
+//     },
+//     [dispatch]
+//   );
+
+//   const onEdgesChange = useCallback((changes: EdgeChange[]) => {
+//     // Optional: handle edge changes (like deletion)
+//     console.log("Edge changes:", changes);
+//   }, []);
+
+//   const onConnect = useCallback(
+//     (connection: Connection) => {
+//       if (!connection.source || !connection.target) return;
+
+//       dispatch(
+//         addEdgeRedux({
+//           from: connection.source,
+//           to: connection.target,
+//         })
+//       );
+//     },
+//     [dispatch]
+//   );
+//   const onDrop = useCallback(
+//     (event: React.DragEvent) => {
+//       event.preventDefault();
+//       const type = event.dataTransfer.getData("application/reactflow");
+//       if (!type) return;
+
+//       const reactFlowBounds = event.currentTarget.getBoundingClientRect();
+//       const x = event.clientX - reactFlowBounds.left;
+//       const y = event.clientY - reactFlowBounds.top;
+
+//       dispatch(addNode({ type, x, y } as any));
+//     },
+//     [dispatch]
+//   );
+
+//   const onDragOver = (event: React.DragEvent) => {
+//     event.preventDefault();
+//   };
+
+//   const onNodeClick = useCallback(
+//     (_event: React.MouseEvent, node: RFNode) => {
+//       dispatch(setSelectedNodeId(node.id));
+//     },
+//     [dispatch]
+//   );
+
+//   /* ---------------- Render ---------------- */
+//   return (
+//     <div className="w-full h-full">
+//       <ReactFlow
+//         nodes={rfNodes}
+//         edges={rfEdges}
+//         nodeTypes={nodeTypes}
+//         // edgeTypes={edgeTypes}
+//         // edgeTypes={edgeTypes}
+//         onNodeClick={onNodeClick}
+//         onNodesChange={onNodesChange}
+//         onEdgesChange={onEdgesChange}
+//         onConnect={onConnect}
+//         onPaneClick={onPaneClick}
+//         onDrop={onDrop}
+//         onDragOver={onDragOver}
+//         fitView
+//         connectionLineStyle={{ stroke: "#60a5fa", strokeWidth: 2 }}
+//       >
+//         <Background variant={BackgroundVariant.Dots} gap={16} />
+//         <Controls
+//           style={{
+//             backgroundColor: "#020617",
+//             border: "1px solid #1e293b",
+//             borderRadius: 8,
+//             padding: 4,
+//           }}
+//         />
+//         <MiniMap
+//           nodeColor={(node) => {
+//             if (node.type === "customNode") return "#60a5fa"; // blue
+//             return "#999";
+//           }}
+//           nodeStrokeColor={(node) => {
+//             return node.selected ? "#22c55e" : "#1f2937"; // green / dark
+//           }}
+//           nodeStrokeWidth={2}
+//           maskColor="rgba(0, 0, 0, 0.6)" // background overlay
+//           style={{
+//             backgroundColor: "#111827", // minimap background
+//           }}
+//         />
+//       </ReactFlow>
+//     </div>
+//   );
+// };
+
+// export default WorkflowCanvas;
+
+import React, { useCallback, useMemo, useEffect } from "react"; // ⭐ ADDED useEffect
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store/store";
+import {
+  addNode,
+  updateNode,
+  addEdge as addEdgeRedux,
+  setSelectedNodeId,
+  loadWorkflow, // ⭐ ADDED
+} from "../../store/editorSlice.js";
+
+import {
+  ReactFlow,
+  Background,
   Controls,
   MiniMap,
-  Background,
   BackgroundVariant,
-  ReactFlowProvider,
-} from "reactflow";
+  Handle,
+  Position,
+  type Node as RFNode,
+  type Edge as RFEdge,
+  type NodeChange,
+  type EdgeChange,
+  type Connection,
+  type NodeProps,
+  type NodeTypes,
+  type EdgeTypes,
+} from "@xyflow/react";
 
-const nodeTypes = {
-  custom: [],
+import "@xyflow/react/dist/style.css";
+import CustomEdge from "./Edge";
+
+export interface Node {
+  id: string;
+  type: string;
+  x: number;
+  y: number;
+  label: string;
+  data: Record<string, any>;
+}
+
+export interface Edge {
+  id: string;
+  from: string;
+  to: string;
+}
+
+export interface Workflow {
+  id: string;
+  name: string;
+  nodes: Record<string, Node>;
+  edges: Edge[];
+}
+
+/* ======================================================
+   Custom Node
+====================================================== */
+const NodeComponent: React.FC<NodeProps> = ({ data, selected }) => {
+  return (
+    <div
+      style={{
+        padding: 12,
+        borderRadius: 8,
+        border: selected ? "2px solid #60a5fa" : "1px solid #ccc",
+        background: "#1f2937",
+        color: "white",
+        minWidth: 140,
+        textAlign: "center",
+      }}
+    >
+      <Handle type="target" position={Position.Top} />
+      {data.label as string}
+      <Handle type="source" position={Position.Bottom} />
+    </div>
+  );
 };
 
+/* ======================================================
+   Node & Edge Types
+====================================================== */
+const nodeTypes: NodeTypes = {
+  customNode: NodeComponent,
+};
+
+const edgeTypes: EdgeTypes = {
+  customEdge: CustomEdge as React.ComponentType<any>,
+};
+
+/* ======================================================
+   Helpers
+====================================================== */
+function mapNodes(
+  nodes: Record<string, any>,
+  selectedNodeId: string | null
+): RFNode[] {
+  return Object.values(nodes).map((n: any) => ({
+    id: n.id,
+    type: "customNode",
+    position: { x: n.x ?? 0, y: n.y ?? 0 },
+    selected: n.id === selectedNodeId,
+    data: {
+      label: n.label ?? n.type ?? "Node",
+    },
+  }));
+}
+
+function mapEdges(edges: any[]): RFEdge[] {
+  return edges.map((e) => ({
+    id: e.id,
+    source: e.from,
+    target: e.to,
+  }));
+}
+
+/* ======================================================
+   Workflow Canvas
+====================================================== */
 const WorkflowCanvas: React.FC = () => {
   const dispatch = useDispatch();
-  const { nodes, edges } = useSelector((state: RootState) => state.editor);
 
-  const canvasRef = useRef<HTMLDivElement>(null);
+  const { nodes, edges, selectedNodeId } = useSelector(
+    (state: RootState) => state.editor
+  );
 
-  /* ------------------------------------
-        ZOOM + PAN STATE
-  ------------------------------------ */
-  const [zoom, setZoom] = useState(1);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  /* ======================================================
+     ⭐ LOAD INITIAL NODES FROM SESSION STORAGE
+  ====================================================== */
+  // useEffect(() => {
+  //   const raw = sessionStorage.getItem("user_privious_step");
+  //   if (!raw) return;
 
-  const dragging = useRef(false);
-  const lastPos = useRef({ x: 0, y: 0 });
+  //   const storedNodes = JSON.parse(raw);
 
-  const handleZoomIn = () => setZoom((z) => Math.min(z + 0.1, 2.5));
-  const handleZoomOut = () => setZoom((z) => Math.max(z - 0.1, 0.3));
+  //   const nodesMap: Record<string, any> = {};
+  //   const edges: any[] = [];
 
-  //===============================================
+  //   storedNodes.forEach((item: any, index: number) => {
+  //     const id = String(item.id);
 
-  const [rfNodes, setRfNodes, onNodesChange] = useNodesState([]);
-  const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState([]);
+  //     nodesMap[id] = {
+  //       id,
+  //       type: item.name,
+  //       label: item.name,
+  //       x: 200 * index,
+  //       y: 100,
+  //       data: item.meta_data ?? {},
+  //     };
 
-  const [reactFlowInstance, setReactFlowInstance] = useState(null);
+  //     // ⭐ CREATE EDGE TO PREVIOUS NODE
+  //     if (index > 0) {
+  //       edges.push({
+  //         id: `e-${storedNodes[index - 1].id}-${id}`,
+  //         from: String(storedNodes[index - 1].id),
+  //         to: id,
+  //       });
+  //     }
+  //   });
 
-  const onConnect = useCallback((connection: Connection) => {
-    setRfEdges((eds) => addEdge(connection, eds));
-  }, []);
-
-  const onNodeClick = useCallback((event: any, node: any) => {
-    console.log("Node clicked:", node);
-  }, []);
-
-  const nodeTypes = {
-    customNode: NodeComponent, // Use your custom Node here
-  };
-
-  //=============================================
-
-  /* ------------------------------------
-        FIXED: WHEEL ZOOM (mouse-centered)
-  ------------------------------------ */
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const wheelHandler = (e: WheelEvent) => {
-      e.preventDefault();
-
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      const delta = e.deltaY > 0 ? -0.1 : 0.1;
-      const newZoom = Math.min(Math.max(zoom + delta, 0.3), 2.5);
-
-      // Keep zoom centered on mouse
-      setOffset((prev) => ({
-        x: mouseX - ((mouseX - prev.x) * newZoom) / zoom,
-        y: mouseY - ((mouseY - prev.y) * newZoom) / zoom,
-      }));
-
-      setZoom(newZoom);
-    };
-
-    canvas.addEventListener("wheel", wheelHandler, { passive: false });
-    return () => canvas.removeEventListener("wheel", wheelHandler);
-  }, [zoom, offset]);
-
-  /* ------------------------------------
-        PAN CANVAS (drag background)
-  ------------------------------------ */
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest(".node")) return;
-
-    dragging.current = true;
-    lastPos.current = { x: e.clientX, y: e.clientY };
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!dragging.current) return;
-
-    const dx = e.clientX - lastPos.current.x;
-    const dy = e.clientY - lastPos.current.y;
-
-    lastPos.current = { x: e.clientX, y: e.clientY };
-
-    setOffset((prev) => ({
-      x: prev.x + dx,
-      y: prev.y + dy,
-    }));
-  };
-
-  const handleMouseUp = () => {
-    dragging.current = false;
-  };
-
-  /* ------------------------------------
-        LOAD WORKFLOW FROM SESSION
-  ------------------------------------ */
-  function convertStepsToWorkflow(sortedArray: any[]) {
-    const nodes: Record<string, any> = {};
-    const edges: any[] = [];
-
-    const startX = 1000;
-    const startY = 80;
-    const xGap = 300;
-    const yGap = 160;
-
-    sortedArray.forEach((step, index) => {
-      const id = String(step.id);
-      nodes[id] = {
-        id,
-        type: step.name,
-        label:
-          step.index === 0 ? `${step.name} TRIGGER` : `${step.name} ACTION`,
-        x: startX + (index * xGap - (sortedArray.length * xGap) / 2),
-        y: startY + index * yGap,
-        metadata: step.meta_data || {},
-      };
-
-      if (index > 0) {
-        const prevId = String(sortedArray[index - 1].id);
-        edges.push({
-          id: `edge-${prevId}-${id}`,
-          from: prevId,
-          to: id,
-        });
-      }
-    });
-
-    return {
-      workflowId: null,
-      workflowName: "Untitled Workflow",
-      nodes,
-      edges,
-      selectedNodeId: null,
-      connectMode: null,
-    };
-  }
+  //   dispatch(
+  //     loadWorkflow({
+  //       id: "session-workflow",
+  //       name: "Session Workflow",
+  //       nodes: nodesMap,
+  //       edges,
+  //     } )
+  //   );
+  // }, [dispatch]);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("user_privious_step");
     if (!raw) return;
 
-    const sorted = JSON.parse(raw)?.sort((a, b) => a.index - b.index);
-    const workflowState = convertStepsToWorkflow(sorted);
+    const storedNodes: any[] = JSON.parse(raw);
+
+    const nodesMap: Record<string, Node> = {};
+    const edges: Edge[] = [];
+
+    storedNodes.forEach((item: any, index: number) => {
+      const id = String(item.id);
+
+      nodesMap[id] = {
+        id,
+        type: item.name,
+        label: item.name,
+        x: 100 * index,
+        y: 200 * index,
+        data: item.meta_data ?? {},
+      };
+
+      if (index > 0) {
+        edges.push({
+          id: `e-${storedNodes[index - 1].id}-${id}`,
+          from: String(storedNodes[index - 1].id),
+          to: id,
+        });
+      }
+    });
+
+    const workflow: Workflow = {
+      id: "session-workflow",
+      name: "Session Workflow",
+      nodes: nodesMap,
+      edges,
+    };
 
     // @ts-ignore
-    dispatch(loadWorkflow(workflowState));
+    dispatch(loadWorkflow(workflow));
+  }, [dispatch]);
+
+  const rfNodes = useMemo(
+    () => mapNodes(nodes, selectedNodeId),
+    [nodes, selectedNodeId]
+  );
+
+  const rfEdges = useMemo(() => mapEdges(edges), [edges]);
+
+  const onPaneClick = useCallback(() => {
+    dispatch(setSelectedNodeId(null));
+  }, [dispatch]);
+
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      changes.forEach((change) => {
+        if (change.type === "position" && change.position) {
+          dispatch(
+            updateNode({
+              id: change.id,
+              data: {
+                x: change.position.x,
+                y: change.position.y,
+              },
+            })
+          );
+        }
+
+        if (change.type === "select") {
+          dispatch(setSelectedNodeId(change.selected ? change.id : null));
+        }
+      });
+    },
+    [dispatch]
+  );
+
+  const onEdgesChange = useCallback((changes: EdgeChange[]) => {
+    console.log("Edge changes:", changes);
   }, []);
 
-  /* ------------------------------------
-        ADD NODE BY DROP
-  ------------------------------------ */
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      if (!connection.source || !connection.target) return;
+
+      dispatch(
+        addEdgeRedux({
+          from: connection.source,
+          to: connection.target,
+        })
+      );
+    },
+    [dispatch]
+  );
+
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
-      const bounds = canvasRef.current?.getBoundingClientRect();
-      const type = event.dataTransfer.getData(
-        "application/reactflow"
-      ) as NodeType;
 
-      if (!type || !bounds) return;
+      const type = event.dataTransfer.getData("application/reactflow");
+      if (!type) return;
 
-      const position = {
-        x: (event.clientX - bounds.left - offset.x) / zoom,
-        y: (event.clientY - bounds.top - offset.y) / zoom,
-      };
+      const bounds = event.currentTarget.getBoundingClientRect();
+      const x = event.clientX - bounds.left;
+      const y = event.clientY - bounds.top;
 
-      dispatch(addNode({ type, x: position.x, y: position.y }));
+      dispatch(addNode({ type, x, y } as any));
     },
-    [dispatch, zoom, offset]
+    [dispatch]
   );
 
   const onDragOver = (event: React.DragEvent) => {
     event.preventDefault();
   };
 
-  const handleNodeMove = useCallback(
-    (id: string, x: number, y: number) => {
-      const node = nodes[id];
-      if (node) {
-        const deltaX = x - node.x;
-        const deltaY = y - node.y;
-        const newX = node.x + deltaX / zoom;
-        const newY = node.y + deltaY / zoom;
-        dispatch(moveNode({ id, x: newX, y: newY }));
-      }
+  const onNodeClick = useCallback(
+    (_event: React.MouseEvent, node: RFNode) => {
+      dispatch(setSelectedNodeId(node.id));
     },
-    [dispatch, nodes, zoom]
+    [dispatch]
   );
 
-  /* ------------------------------------
-        RENDER
-  ------------------------------------ */
   return (
-    <div className="relative w-full h-full">
-      {/* Zoom Buttons */}
-      <div className="absolute top-4 right-4 z-50 flex flex-col gap-2">
-        <button
-          onClick={handleZoomIn}
-          className="w-10 h-10 bg-gray-800 text-white rounded-full flex items-center justify-center text-xl"
-        >
-          +
-        </button>
-        <button
-          onClick={handleZoomOut}
-          className="w-10 h-10 bg-gray-800 text-white rounded-full flex items-center justify-center text-xl"
-        ></button>
-      </div>
-      
-      
+    <div className="w-full h-full">
       <ReactFlow
-        ref={canvasRef}
+        nodes={rfNodes}
+        edges={rfEdges}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        onNodeClick={onNodeClick}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onPaneClick={onPaneClick}
         onDrop={onDrop}
         onDragOver={onDragOver}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        className="w-full h-full overflow-hidden bg-grid relative"
-        style={{
-          cursor: dragging.current ? "grabbing" : "grab",
-        }}
+        fitView
       >
-        <div
-          style={{
-            transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
-            transformOrigin: "0 0", // 🔥 FIX
-            width: "100%",
-            height: "100%",
-            position: "relative",
+        <Background variant={BackgroundVariant.Dots} gap={16} />
+        <Controls />
+        <MiniMap
+          nodeColor={(node) => {
+            if (node.type === "customNode") return "#60a5fa"; // blue
+            return "#999";
           }}
-        >
-          <svg className="absolute w-full h-full top-0 left-0 pointer-events-none">
-            {edges.map((edge) => {
-              const fromNode = nodes[edge.from];
-              const toNode = nodes[edge.to];
-              if (!fromNode || !toNode) return null;
-              return (
-                <EdgeComponent
-                  key={edge.id}
-                  edge={edge}
-                  fromNode={fromNode}
-                  toNode={toNode}
-                />
-              );
-            })}
-          </svg>
-
-          {Object.values(nodes).map((node: Node) => (
-            //@ts-ignore
-            <NodeComponent key={node.id} node={node} onMove={handleNodeMove} />
-          ))}
-        </div>
+          nodeStrokeColor={(node) => {
+            return node.selected ? "#22c55e" : "#1f2937"; // green / dark
+          }}
+          nodeStrokeWidth={2}
+          maskColor="rgba(0, 0, 0, 0.6)" // background overlay
+          style={{
+            backgroundColor: "#111827", // minimap background
+          }}
+        />
       </ReactFlow>
     </div>
   );
 };
 
 export default WorkflowCanvas;
-
-

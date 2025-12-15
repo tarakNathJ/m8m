@@ -120,7 +120,12 @@ const WorkflowListItem = ({
         </div>
         <div>
           <p className="font-bold text-white">{wf.name}</p>
-          <p className="text-sm text-gray-500">Updated </p>
+
+          {wf?.stepes[0]?.meta_data?.URL ? (
+            <p className="text-sm text-gray-500">
+              {wf?.stepes[0]?.meta_data?.URL!}{" "}
+            </p>
+          ) : null}
         </div>
       </div>
       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -145,15 +150,6 @@ const WorkflowListItem = ({
                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
                 className="absolute right-0 top-10 w-40 bg-[#373a3d] border border-gray-700 rounded-lg shadow-xl z-10"
               >
-                <button
-                  onClick={() => {
-                    onDuplicate(wf.id);
-                    setMenuOpen(false);
-                  }}
-                  className="w-full text-left flex items-center gap-2 px-3 py-2 hover:bg-white/5"
-                >
-                  <Copy size={14} /> Duplicate
-                </button>
                 <button
                   onClick={() => {
                     onDelete(wf.id);
@@ -190,7 +186,7 @@ const DashboardPage: React.FC = () => {
     }
     (async () => {
       const responce = await api_init.get("/api/workflow/get-workflow");
-
+      console.log(responce);
       dispatch(createWorkflow(responce.data.data));
     })();
   }, [dispatch]);
@@ -220,8 +216,7 @@ const DashboardPage: React.FC = () => {
     console.log("responce data : ", responce.data.data);
 
     if (responce.data.success) {
-
-      console.log(responce)
+      console.log(responce);
       sessionStorage.setItem(
         type_of_step,
         JSON.stringify(responce.data.data.get_all_type_of_step)

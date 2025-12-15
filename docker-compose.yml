@@ -34,3 +34,14 @@ services:
       - "3001:3000"
     depends_on:
       - prometheus
+
+
+
+# docker run -d \
+#   --name postgres-db \
+#   -e POSTGRES_USER=postgres \
+#   -e POSTGRES_PASSWORD=mysecretpassword \
+#   -e POSTGRES_DB=postgres \
+#   -p 5432:5432 \
+#   -v postgres_data:/var/lib/postgresql/data \
+#   postgres:bookworm

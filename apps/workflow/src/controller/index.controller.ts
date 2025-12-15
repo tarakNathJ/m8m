@@ -1,8 +1,7 @@
 import { prisma, schemaType } from "@master/database";
 import type { Request, Response } from "express";
 import { type_chack_for_steps_metadata } from "../utils/meta_data_object_chack.js";
-import { api_responce ,async_handler ,api_error } from "@repo/handler"
-
+import { api_responce, async_handler, api_error } from "@repo/handler";
 
 export const create_types_of_steps = async_handler(
   async (req: Request, res: Response) => {
@@ -97,6 +96,7 @@ export const create_step = async_handler(
       throw new api_error(400, "full fill all requirement", Error.prototype);
     }
 
+    console.log(name, index, workflow_id, typeofstap_id, meta_data);
     let status = false;
 
     // chack every apps metadata are exist or not
@@ -269,17 +269,35 @@ export const get_all_workflow = async_handler(async (req, res) => {
   // get  all workflow
   const get_workflow = await prisma.workflow.findMany({
     where: {
-      // @ts-ignore
+      //@ts-ignore
       user_id: req.user.id,
     },
     select: {
-      name: true,
       id: true,
+      name: true,
       create_at: true,
+
+      // counts
       _count: {
         select: {
           stepes: true,
           stepes_runs: true,
+        },
+      },
+
+      // ⭐ FIRST STEP
+      stepes: {
+        orderBy: {
+          index: "asc", 
+        },
+        take: 1, 
+        select: {
+          id: true,
+          name: true,
+          index: true,
+          meta_data: true,
+          status: true,
+          create_at: true,
         },
       },
     },
@@ -412,10 +430,16 @@ export const get_workflow_data = async_handler(async (req, res) => {
     },
   });
 
-
   const get_all_type_of_step = await prisma.typeofstep.findMany();
   if (!find_workflow_are_exist_or_not) {
     throw new api_error(404, "workflow are not exist", Error.prototype);
   }
- return res.status(200).json( new api_responce(200, {find_workflow_are_exist_or_not ,get_all_type_of_step}))
+  return res
+    .status(200)
+    .json(
+      new api_responce(200, {
+        find_workflow_are_exist_or_not,
+        get_all_type_of_step,
+      })
+    );
 });

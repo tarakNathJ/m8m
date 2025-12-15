@@ -8,7 +8,7 @@ import DashboardPage from "./pages/DashboardPage";
 import EditorPage from "./pages/EditorPage";
 import WorkflowsPage from "./pages/WorkflowsPage";
 import { setAuthFromLocalStorage } from "./store/authSlice";
-
+import { Toaster } from 'sonner'
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 const App: React.FC = () => {
@@ -36,6 +36,8 @@ const App: React.FC = () => {
           <Route path="/workflows" element={<WorkflowsPage/>} />
         </Routes>
       </BrowserRouter>
+
+      <Toaster/>
     </div>
   );
 };
