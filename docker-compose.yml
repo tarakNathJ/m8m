@@ -1,7 +1,7 @@
 services:
   # =============================primary backend==========================
   primary_backend:
-    image: n8n/primary_backend:v1
+    image: taraknathjana09/n8n_primary_backend
     container_name: primary_backend
     ports:
       - "4040:4040"
@@ -23,7 +23,7 @@ services:
 
   # ============================= workflow ====================================
   workflow:
-    image: n8_n/workflow:v1
+    image: taraknathjana09/n8n_workflow:v1
     container_name: workflow
     ports:
       - "4080:4080"
@@ -46,7 +46,7 @@ services:
 
   # ============================= cron worker ====================================
   cron_worker:
-    image: n8_n/cron_worker:v1
+    image: taraknathjana09/n8n_cron_worker:v1
     container_name: cron_worker
     networks:
       - backend_network
@@ -67,7 +67,7 @@ services:
           memory: 256m
 
   processar:
-    image: n8n/processar:v1
+    image: taraknathjana09/n8n_processar:v1
     container_name: processar
     networks:
       - backend_network
@@ -88,7 +88,7 @@ services:
           memory: 256m
 
   worker:
-    image: n8n/worker:v1
+    image: taraknathjana09/n8n_worker:v1
     container_name: worker
     networks:
       - backend_network
@@ -123,7 +123,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - timescaledb-data:/var/lib/postgresql/data
+      - postgresql_db:/var/lib/postgresql/data
     restart: always
     networks:
       - backend_network

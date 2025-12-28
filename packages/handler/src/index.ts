@@ -98,7 +98,7 @@ function create_job_metrics(job_name: string) {
   const register = new promClient.Registry();
 
   const gateway = new promClient.Pushgateway(
-    "http://localhost:9091",
+    process.env.PUSHGATEWAY_URL!,
     {},
     register
   );
