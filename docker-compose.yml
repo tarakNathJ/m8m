@@ -214,7 +214,7 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
-      - ./prometheus-config.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus_config.yml:/etc/prometheus/prometheus.yml:ro
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       # - "--web.external-url=http://prom.taraknathjana.com"
