@@ -1,26 +1,45 @@
 global:
-  scrape_interval: 5s
-  evaluation_interval: 5s
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'n8n-clone'
+    environment: 'production'
 
 scrape_configs:
-
-
-  - job_name: 'primary-backend'
-    static_configs:
-      - targets: ['192.168.0.104:4080']
-
-
-  - job_name: 'workflow-service'
-    static_configs:
-      - targets: ['192.168.0.104:4040']
-
-
-  - job_name: 'pushgateway'
-    honor_labels: true   
-    static_configs:
-      - targets: ["192.168.0.104:9091"]
-
-
+  # Prometheus self-monitoring
   - job_name: 'prometheus'
     static_configs:
-      - targets: ['192.168.0.104:9090']
+      - targets: ['localhost:9090']
+
+  # Pushgateway for batch jobs and workers
+  - job_name: 'pushgateway'
+    honor_labels: true
+    static_configs:
+      - targets: ['pushgateway:9091']
+
+  # PostgreSQL exporter (if you add one later)
+  - job_name: 'postgresql'
+    static_configs:
+      - targets: ['postgresql:5432']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Kafka exporter (if you add one later)
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka:9092']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Application services (if they expose metrics endpoints)
+  - job_name: 'primary_backend'
+    static_configs:
+      - targets: ['primary_backend:4040']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'workflow'
+    static_configs:
+      - targets: ['workflow:4080']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
