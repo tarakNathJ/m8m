@@ -9,37 +9,10 @@ scrape_configs:
   # Prometheus self-monitoring
   - job_name: 'prometheus'
     static_configs:
-      - targets: [':9090']
+      - targets: ['192.168.0.104:9090']
 
-  # Pushgateway for batch jobs and workers
+  # Pushgateway
   - job_name: 'pushgateway'
     honor_labels: true
     static_configs:
-      - targets: [':9091']
-
-  # PostgreSQL exporter (if you add one later)
-  - job_name: 'postgresql'
-    static_configs:
-      - targets: [':5432']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
-
-  # Kafka exporter (if you add one later)
-  - job_name: 'kafka'
-    static_configs:
-      - targets: ['kafka:9092']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
-
-  # Application services (if they expose metrics endpoints)
-  - job_name: 'primary_backend'
-    static_configs:
-      - targets: [':4040']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
-
-  - job_name: 'workflow'
-    static_configs:
-      - targets: [':4080']
-    metrics_path: '/metrics'
-    scrape_interval: 30s
+      - targets: ['192.168.0.104:9091']

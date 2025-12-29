@@ -1,7 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
 import type { asyncFunction, type_for_responce } from "./types/index.js";
 import promClient from "prom-client";
+import { config } from "dotenv";
 
+
+config();
 const async_handler =
   (func: asyncFunction) =>
   async (req: Request, res: Response, next: NextFunction) => {
@@ -120,6 +123,7 @@ function create_job_metrics(job_name: string) {
     job_duration,
     push: async () => {
       try {
+        console.log(process.env.PUSHGATEWAY_URL)
         await gateway.pushAdd({ jobName: job_name });
         console.log(` Metrics pushed for job: ${job_name}`);
       } catch (err: any) {

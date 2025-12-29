@@ -2,7 +2,7 @@ import axios from "axios";
 import { config } from "process";
 
 const api_instance = axios.create({
-  baseURL: `http://localhost:4080`,
+  baseURL: import.meta.env.VITE_AUTH_URL,
   timeout: 8000,
   headers: {
     "Content-Type": "application/json",
@@ -37,7 +37,7 @@ api_instance.interceptors.response.use(
  
 
 const api_init = axios.create({
-  baseURL: `http://localhost:4040`,
+  baseURL:import.meta.env.VITE_WORKFLOW_URL ,
   timeout: 8000,
   headers: {
     "Content-Type": "application/json",
