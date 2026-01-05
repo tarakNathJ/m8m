@@ -1,9 +1,8 @@
-
-import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './authSlice';
-import navigationReducer from './navigationSlice';
-import workflowsReducer from './workflowsSlice';
-import editorReducer from './editorSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import authReducer from "./authSlice";
+import navigationReducer from "./navigationSlice";
+import workflowsReducer from "./workflowsSlice";
+import editorReducer from "./editorSlice";
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +10,7 @@ export const store = configureStore({
     navigation: navigationReducer,
     workflows: workflowsReducer,
     editor: editorReducer,
+
   },
 });
 

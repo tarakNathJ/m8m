@@ -9,7 +9,7 @@ export const useAutoSave = () => {
   const dispatch = useDispatch();
   const editorState = useSelector((state: RootState) => state.editor);
   const timeoutRef = useRef<number | null>(null);
-
+  console.log("save")
   useEffect(() => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);

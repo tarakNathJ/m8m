@@ -16,7 +16,20 @@ import { useAutoSave } from "../hooks/useAutoSave";
 import { ArrowLeft, Play, Save } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { api_init } from "@/hooks/api";
+import { toast } from "sonner";
 
+
+
+type Node = {
+  id: string;
+  type: string;
+};
+
+type Edge = {
+  from: string;
+  to: string;
+};
 interface EditorPageProps {
   workflowId: string;
 }
@@ -27,10 +40,12 @@ const EditorPage: React.FC<EditorPageProps> = ({ workflowId }) => {
   const workflowName = useSelector(
     (state: RootState) => state.editor.workflowName
   );
-  useAutoSave();
+
+  const { nodes, edges, selectedNodeId } = useSelector(
+    (state: RootState) => state.editor
+  );
 
   const url = JSON.parse(sessionStorage.getItem("user_privious_step"));
-  console.log(url);
 
   useEffect(() => {
     const workflows = getWorkflows();
@@ -46,6 +61,70 @@ const EditorPage: React.FC<EditorPageProps> = ({ workflowId }) => {
     dispatch(setSelectedNodeId(null));
     dispatch(cancelConnect());
   }, [dispatch]);
+
+  async function saveNodesHandler() {
+    // Map nodes by id for fast lookup
+    const nodeMap = new Map<string, Node>();
+    if (nodes) {
+      for (const key in nodes) {
+        if (Object.hasOwn(nodes, key)) {
+          // Ensures you only loop over own properties, not inherited ones
+          const node = nodes[key];
+          nodeMap.set(node.id, node);
+        }
+      }
+    }
+    // Find webhook node (start)
+
+    let startNodeId: any | null = null;
+    for (const key in nodes) {
+      // @ts-ignore
+      if (nodes[key].type === "webhook") {
+        startNodeId = nodes[key];
+        break;
+      }
+    }
+
+    if (!startNodeId) {
+      throw new Error("Webhook node not found");
+    }
+
+    // const startNode = nodes.find((node) => node.type === "webhook");
+
+    const result: Record<number, Object> = {};
+    let order = 0;
+    // @ts-ignore
+    let currentNodeId = startNodeId.id;
+
+    // Traverse graph
+    while (currentNodeId) {
+      const currentNode = nodeMap.get(currentNodeId);
+      if (!currentNode) break;
+
+      result[order++] = {
+        type: currentNode.type,
+        id: currentNode.id,
+      };
+
+      const nextEdge = edges.find((edge) => edge.from === currentNodeId);
+      if (!nextEdge) break;
+
+      currentNodeId = nextEdge.to;
+    }
+
+    const workflow_Id_ = sessionStorage.getItem("workflow_id");
+    if (!workflow_Id_) {
+      throw new Error("workflow id are not present");
+    }
+    const modifures = await api_init.post("/api/workflow/save-workflow", {
+      workflow_id: workflow_Id_,
+      workflow_index_object: result
+    });
+
+    if(modifures.data.success){
+      toast.success(modifures.data.message)
+    }
+  }
 
   return (
     <div className="h-screen w-screen flex flex-col bg-gray-900 overflow-hidden">
@@ -76,6 +155,7 @@ const EditorPage: React.FC<EditorPageProps> = ({ workflowId }) => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={saveNodesHandler}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#4295f1] to-[#57a1f2] rounded-lg font-semibold"
           >
             <Play className="w-5 h-5" />

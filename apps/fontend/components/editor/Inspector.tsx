@@ -82,30 +82,25 @@ const Inspector: React.FC = () => {
     };
 
     try {
-     
       const responce = await api_init.post("/api/workflow/create-step", {
         name: found.name,
-        index: node,
+        index: parseInt(selectedNode.id),
         workflow_id: JSON.parse(sessionStorage.getItem("workflow_id")),
         typeofstap_id: found.id,
         meta_data: fieldValues,
       });
 
-    
       if (responce.data.success) {
         toast(`save node : ${(type_of__step as any).name}`, {
           description: responce.data.message,
         });
       }
-
     } catch (error: any) {
       console.log(error);
       toast(`node save failed : ${(type_of__step as any).name}`, {
         description: error.message,
       });
-     
     }
-   
   };
 
   const handleDelete = () => {
@@ -137,7 +132,7 @@ const Inspector: React.FC = () => {
           <h2 className="text-xl font-bold text-white mb-6">Inspector</h2>
 
           <div className="flex-grow space-y-4">
-            <div>
+            <div className=" hidden ">
               <label className="text-sm font-medium text-gray-400 block mb-1">
                 Node ID
               </label>
@@ -147,7 +142,7 @@ const Inspector: React.FC = () => {
                 name="node"
                 id="node-id"
                 placeholder="enter node index every start from 0"
-                onChange={(e) => setNode(parseInt(e.target.value))}
+                onChange={(e) => setNode(parseInt(selectedNode.id))}
                 className="w-full text-xs text-gray-500 bg-gray-800 p-2 rounded"
               />
             </div>
