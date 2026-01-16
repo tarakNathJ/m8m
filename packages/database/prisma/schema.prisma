@@ -87,7 +87,7 @@ model workflow {
   status      status
   create_at   DateTime
   update_at   DateTime     @default(now())
-  user        user         @relation(references: [id], fields: [user_id])
+  user        user         @relation(references: [id], fields: [user_id] ,onDelete: Cascade)
   stepes      step[]
   stepes_runs stepes_run[]
  
@@ -107,8 +107,8 @@ model step {
   create_at     DateTime
   update_at     DateTime   @default(now())
   typeofstep    typeofstep @relation(references: [id], fields: [typeofstap_id])
-  user          user       @relation(references: [id], fields: [user_id])
-  workflow      workflow   @relation(references: [id], fields: [workflow_id])
+  user          user       @relation(references: [id], fields: [user_id],onDelete: Cascade)
+  workflow      workflow   @relation(references: [id], fields: [workflow_id] ,onDelete: Cascade)
 
   @@unique([workflow_id, index])
   @@index([workflow_id, id, user_id, index])
@@ -121,7 +121,7 @@ model stepes_run {
   workflow_id Int
   create_at   DateTime
   update_at   DateTime @default(now())
-  workflow                workflow                 @relation(references: [id], fields: [workflow_id])
+  workflow                workflow                 @relation(references: [id], fields: [workflow_id],onDelete: Cascade)
   out_box_step_run        out_box_step_run[]
   working_step_validation working_step_validator[]
   
@@ -134,7 +134,7 @@ model out_box_step_run {
   stepes_run_id Int
   create_at     DateTime
   update_at     DateTime   @default(now())
-  stepes_run    stepes_run @relation(references: [id], fields: [stepes_run_id])
+  stepes_run    stepes_run @relation(references: [id], fields: [stepes_run_id] ,onDelete: Cascade)
 }
 
 model working_step_validator {
@@ -146,7 +146,7 @@ model working_step_validator {
   status                 step_validation_status
   create_at              DateTime
   update_at              DateTime                 @default(now())
-  stepes_run             stepes_run               @relation(references: [id], fields: [stepes_run_id])
+  stepes_run             stepes_run               @relation(references: [id], fields: [stepes_run_id],onDelete: Cascade)
   reseve_email_validator reseve_email_validator[]
 
   @@index([message_id])

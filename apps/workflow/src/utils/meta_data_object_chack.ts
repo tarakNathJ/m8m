@@ -26,7 +26,7 @@ class type_chack_for_steps_metadata {
   }
 
   is_telegram(obj: telegram): boolean {
-    console.log( "data : ", obj)
+  
     if (
       typeof obj === "object" &&
       obj !== null &&

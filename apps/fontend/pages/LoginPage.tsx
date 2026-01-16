@@ -15,22 +15,22 @@ const LoginPage: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(email, password);
+   
     try {
-      console.log("here");
+  
       const responce = await api_instance.post("/api/auth/login", {
         email: email,
         password: password,
       });
 
-      console.log(responce.data.data.access_token);
+   
 
       localStorage.setItem("access_token", responce.data.data.access_token);
       sessionStorage.setItem("user_id", responce.data.data.id);
       navigate("/dashboard");
 
     } catch (error) {
-      console.log(error);
+      
       throw error;
     }
   };
@@ -92,7 +92,7 @@ const LoginPage: React.FC = () => {
         <p className="text-sm text-center text-gray-400">
           Don't have an account?{" "}
           <button
-            onClick={() => dispatch(setView({ view: "signup" }))}
+            onClick={() => navigate("/signup")}
             className="font-medium text-[#81b8f5] hover:underline"
           >
             Sign up

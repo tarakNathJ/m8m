@@ -204,7 +204,7 @@ const WorkflowCanvas: React.FC = () => {
   );
 
   const onEdgesChange = useCallback((changes: EdgeChange[]) => {
-    console.log("Edge changes:", changes);
+    
   }, []);
 
   const onConnect = useCallback(
@@ -248,8 +248,7 @@ const WorkflowCanvas: React.FC = () => {
     [dispatch]
   );
 
-  console.log(nodes)
-  console.log(edges)
+
 
   return (
     <div className="w-full h-full">

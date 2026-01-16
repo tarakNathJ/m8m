@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store/store";
+
 import { setView } from "../store/navigationSlice";
 import {
   loadWorkflows,
@@ -28,6 +29,7 @@ import { Workflow } from "../types";
 import DashboardSidebar from "../components/DashboardSidebar";
 import { useNavigate } from "react-router-dom";
 import { api_init } from "@/hooks/api.js";
+import { toast } from "sonner";
 
 const StatCard = ({
   title,
@@ -106,6 +108,28 @@ const WorkflowListItem = ({
   onDuplicate: (id: string) => void;
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const deleteWorkflow = async () => {
+    // onDelete(wf.id);
+    // setMenuOpen(false);
+
+    // console.log("Deleting workflow with ID:", wf.id);
+    try {
+      const response = await api_init.delete(
+        `/api/workflow/delete-workflow/${wf.id}`
+      );
+
+      if (response.data.success) {
+        toast.success("Workflow deleted successfully!");
+        onDelete(wf.id);
+      } else {
+        toast.error("Failed to delete workflow.");
+      }
+    } catch (error) {
+      console.error("Error deleting workflow:", error);
+      toast.error("An error occurred while deleting the workflow.");
+    }
+  };
   return (
     <motion.div
       layout
@@ -151,10 +175,7 @@ const WorkflowListItem = ({
                 className="absolute right-0 top-10 w-40 bg-[#373a3d] border border-gray-700 rounded-lg shadow-xl z-10"
               >
                 <button
-                  onClick={() => {
-                    onDelete(wf.id);
-                    setMenuOpen(false);
-                  }}
+                  onClick={() => deleteWorkflow()}
                   className="w-full text-left flex items-center gap-2 px-3 py-2 text-red-400 hover:bg-white/5"
                 >
                   <Trash2 size={14} /> Delete
@@ -186,37 +207,31 @@ const DashboardPage: React.FC = () => {
     }
     (async () => {
       const responce = await api_init.get("/api/workflow/get-workflow");
-      console.log(responce);
       dispatch(createWorkflow(responce.data.data));
     })();
   }, [dispatch]);
 
   const handleCreateWorkflow = async () => {
     if (newWorkflowName.trim()) {
-      //   dispatch(createWorkflow({ name: newWorkflowName }));
-      //   setNewWorkflowName('');
-      //   setIsModalOpen(false);
       const responce = await api_init.post("/api/workflow/create-workflow", {
         name: newWorkflowName,
       });
 
       if (responce.data.success) {
         setNewWorkflowName("");
+        toast.success("Workflow created successfully!");
         setIsModalOpen(false);
+        window.location.reload();
       }
     }
   };
 
   const handleEdit = async (workflowId: string) => {
-    // dispatch(setView({ view: "editor", workflowId }));
-    // sessionStorage.setItem(workFlow_id,workflowId)
     const responce = await api_init.get(
       `/api/workflow/get-workflow-data/${workflowId}`
     );
-    console.log("responce data : ", responce.data.data);
 
     if (responce.data.success) {
-      console.log(responce);
       sessionStorage.setItem(
         type_of_step,
         JSON.stringify(responce.data.data.get_all_type_of_step)
@@ -337,12 +352,7 @@ const DashboardPage: React.FC = () => {
                 className="bg-[#2a2d30] border border-gray-700 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#4295f1]"
               />
             </div>
-            <button className="p-2.5 rounded-lg bg-[#2a2d30] border border-gray-700 text-gray-400 hover:text-white">
-              <Sun size={20} />
-            </button>
-            <button className="p-2.5 rounded-lg bg-[#2a2d30] border border-gray-700 text-gray-400 hover:text-white">
-              <Bell size={20} />
-            </button>
+
             <div className="w-9 h-9 bg-slate-700 rounded-full flex items-center justify-center font-bold text-[#96c4f7]">
               {userInitial}
             </div>
@@ -394,9 +404,7 @@ const DashboardPage: React.FC = () => {
               <button
                 onClick={() => dispatch(setView({ view: "workflows" }))}
                 className="text-sm font-semibold text-[#81b8f5] hover:underline"
-              >
-                View all &rarr;
-              </button>
+              ></button>
             </div>
             <div className="flex flex-col divide-y divide-gray-700">
               {workflows.slice(0, 5).map((wf) => (
@@ -422,12 +430,6 @@ const DashboardPage: React.FC = () => {
           >
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-white">Recent Activity</h2>
-              <a
-                href="#"
-                className="text-sm font-semibold text-[#81b8f5] hover:underline"
-              >
-                View all ;
-              </a>
             </div>
             <div className="flex flex-col divide-y divide-gray-700">
               {mockActivity.map((act) => (
@@ -478,3 +480,10 @@ const DashboardPage: React.FC = () => {
 };
 
 export default DashboardPage;
+
+// <button className="p-2.5 rounded-lg bg-[#2a2d30] border border-gray-700 text-gray-400 hover:text-white">
+//   {/* <Sun size={20} /> */}
+// </button>
+// <button className="p-2.5 rounded-lg bg-[#2a2d30] border border-gray-700 text-gray-400 hover:text-white">
+//   {/* <Bell size={20} /> */}
+// </button>

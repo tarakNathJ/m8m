@@ -16,9 +16,7 @@ interface NavLinkProps {
 }
 
 const NavLink: React.FC<NavLinkProps> = ({ icon, label, active, onClick }) => {
-    console.log(active);
-    console.log(label);
-    console.log(onClick);
+
     return(
             <button onClick={onClick} className={`flex items-center w-full gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${active ? 'bg-[#4295f1] text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white'}`}>
         {icon}
@@ -63,16 +61,16 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ activeView }) => {
                         <NavLink icon={<LayoutGrid size={18}/>} label="Overview" active={activeView === 'overview'} onClick={() => navigate("/dashboard")} />
                         <NavLink icon={<WorkflowIcon size={18}/>} label="Workflows" active={activeView === 'workflows'} onClick={() => navigate("/workflows")} />
                     </div>
-                    <h2 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-6 mb-2">Resources</h2>
+                    {/* <h2 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mt-6 mb-2">Resources</h2>
                     <div className="space-y-1">
                         <NavLink icon={<KeyRound size={18}/>} label="Credentials" onClick={() => {}} />
-                    </div>
+                    </div> */}
                 </div>
                 <div>
-                    <div className="space-y-1">
+                    {/* <div className="space-y-1">
                         <NavLink icon={<Settings size={18}/>} label="Settings" onClick={() => {}} />
                         <NavLink icon={<HelpCircle size={18}/>} label="Help" onClick={() => {}} />
-                    </div>
+                    </div> */}
                     <div className="border-t border-gray-800 mt-4 pt-4">
                         <div className="flex items-center gap-3">
                             <div className="w-9 h-9 bg-slate-700 rounded-full flex items-center justify-center font-bold text-[#96c4f7]">{userInitial}</div>

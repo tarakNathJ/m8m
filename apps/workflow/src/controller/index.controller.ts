@@ -104,6 +104,7 @@ export const create_step = async_handler(async (req, res) => {
       break;
     case "telegram":
       status = new type_chack_for_steps_metadata().is_telegram(meta_data);
+      console.log("telegram status :", status);
       break;
     case "scheduler":
       status = new type_chack_for_steps_metadata().is_scheduler(meta_data);
@@ -277,8 +278,17 @@ export const get_all_workflow = async_handler(async (req, res) => {
           stepes_runs: true,
         },
       },
-
-      // ⭐ FIRST STEP
+      stepes_runs: {
+        take: 5,
+        orderBy: {
+          create_at: "desc",
+        },
+        select: {
+          id: true,
+          status: true,
+          create_at: true,
+        },
+      },
       stepes: {
         orderBy: {
           index: "asc",
@@ -435,6 +445,92 @@ export const get_workflow_data = async_handler(async (req, res) => {
   );
 });
 
+export const delete_workflow = async_handler(async (req, res) => {
+  const { workflow_id } = req.params;
+
+  if (!workflow_id) {
+    throw new api_error(400, "full fill all requirement", Error.prototype);
+  }
+  await prisma.step.deleteMany({
+    where: {
+      workflow_id: parseInt(workflow_id),
+    },
+  });
+
+  const delete_workflow = await prisma.workflow.delete({
+    where: {
+      id: parseInt(workflow_id),
+    },
+  });
+
+  if (!delete_workflow) {
+    throw new api_error(400, "workflow delete failed", Error.prototype);
+  }
+
+  return res
+    .status(200)
+    .json(new api_responce(200, {}, "workflow delete successfully"));
+});
+
+export const delete_step = async_handler(async (req, res) => {
+  const { step_id, workflow_id } = req.params;
+  // @ts-ignore
+  const user_id = req.user.id;
+  if (!step_id || !workflow_id) {
+    throw new api_error(400, "all field are required", Error.prototype);
+  }
+
+  const chack_step_are_exist_or_not = await prisma.step.findFirst({
+    where: {
+      id: parseInt(step_id),
+      workflow_id: parseInt(workflow_id),
+      user_id: user_id,
+    },
+  });
+
+  if (!chack_step_are_exist_or_not) {
+    throw new api_error(404, "step are not exist", Error.prototype);
+  }
+
+  const delete_step = await prisma.step.delete({
+    where: {
+      id: parseInt(step_id),
+    },
+  });
+
+  if (!delete_step) {
+    throw new api_error(400, "step delete failed", Error.prototype);
+  }
+  return res
+    .status(200)
+    .json(new api_responce(200, {}, "step delete successfully"));
+});
+
+export const on_from_submission = async_handler(async (req, res) => {
+  const { workflow_id, user_id, stepId } = req.params;
+
+  if (!workflow_id || !user_id || !stepId) {
+    throw new api_error(400, "all field are required", Error.prototype);
+  }
+
+  const get_onfrom_step = await prisma.step.findFirst({
+    where: {
+      id: parseInt(stepId),
+      workflow_id: parseInt(workflow_id),
+      user_id: parseInt(user_id),
+      name: "form",
+    },
+  });
+  if (!get_onfrom_step) {
+    throw new api_error(404, "step are not exist", Error.prototype);
+  }
+  return res
+    .status(200)
+    .json(
+      new api_responce(200, get_onfrom_step, "form data received successfully")
+    );
+});
+
 /**
  * Workflow steps are executed strictly based on their `index`
  * (0 → 1 → 2 → ...).
@@ -451,6 +547,7 @@ export const get_workflow_data = async_handler(async (req, res) => {
 
 export const save_workflow = async_handler(async (req, res) => {
   const { workflow_id, workflow_index_object } = req.body;
+  console.log(workflow_id, workflow_index_object);
   // @ts-ignore
   const user_id: number = req.user.id;
 
@@ -460,7 +557,7 @@ export const save_workflow = async_handler(async (req, res) => {
   const find_all_steps = await prisma.step.findMany({
     where: {
       user_id: user_id,
-      workflow_id: workflow_id,
+      workflow_id: parseInt(workflow_id),
     },
   });
 

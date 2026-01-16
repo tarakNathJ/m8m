@@ -19,8 +19,6 @@ import { useNavigate } from "react-router-dom";
 import { api_init } from "@/hooks/api";
 import { toast } from "sonner";
 
-
-
 type Node = {
   id: string;
   type: string;
@@ -116,13 +114,14 @@ const EditorPage: React.FC<EditorPageProps> = ({ workflowId }) => {
     if (!workflow_Id_) {
       throw new Error("workflow id are not present");
     }
+    console.log(result);
     const modifures = await api_init.post("/api/workflow/save-workflow", {
       workflow_id: workflow_Id_,
-      workflow_index_object: result
+      workflow_index_object: result,
     });
 
-    if(modifures.data.success){
-      toast.success(modifures.data.message)
+    if (modifures.data.success) {
+      toast.success(modifures.data.message);
     }
   }
 
@@ -159,7 +158,7 @@ const EditorPage: React.FC<EditorPageProps> = ({ workflowId }) => {
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#4295f1] to-[#57a1f2] rounded-lg font-semibold"
           >
             <Play className="w-5 h-5" />
-            Run
+            save 
           </motion.button>
         </div>
       </header>

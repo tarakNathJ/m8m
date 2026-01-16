@@ -31,7 +31,7 @@ const SignupPage: React.FC = () => {
       localStorage.setItem("access_token", responce.data.data.access_token);
       navigate("/dashboard");
     } catch (error) {
-      console.log(error);
+     
       throw error;
     }
   };

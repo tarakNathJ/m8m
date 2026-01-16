@@ -8,7 +8,9 @@ import {
   get_all_workflow,
   webhook_call,
   get_workflow_data,
-  save_workflow
+  save_workflow,
+  delete_workflow,
+  delete_step,
 } from "../controller/index.controller.js";
 import { verify_JWT } from "../middleware/index.middleware.js";
 
@@ -21,7 +23,16 @@ router.route("/create-step").post(verify_JWT, create_step);
 router.route("/create-workflow").post(verify_JWT, create_work_flow);
 router.route("/get-workflow").get(verify_JWT, get_all_workflow);
 router.route("/webhook/:workflow_id/:user_id").post(webhook_call);
-router.route("/get-workflow-data/:workflow_id").get(verify_JWT, get_workflow_data);
-router.route("/save-workflow").post(verify_JWT,save_workflow)
+router
+  .route("/get-workflow-data/:workflow_id")
+  .get(verify_JWT, get_workflow_data);
+router.route("/save-workflow").post(verify_JWT, save_workflow);
+router
+  .route("/delete-workflow/:workflow_id")
+  .delete(verify_JWT, delete_workflow);
+
+router
+  .route("/delete-step/:step_id/:workflow_id")
+  .delete(verify_JWT, delete_step);
 
 export default router;

@@ -103,9 +103,21 @@ const Inspector: React.FC = () => {
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (selectedNodeId) {
-      dispatch(deleteNode(selectedNodeId));
+      // console.log("Deleting node with ID:", selectedNodeId);
+
+      const responce = await api_init.delete(
+        `/api/workflow/delete-step/${selectedNodeId}/${JSON.parse(
+          sessionStorage.getItem("workflow_id") || "null"
+        )}`
+      );
+      if (responce.data.success) {
+        toast(`delete node : ${(type_of__step as any).name}`, {
+          description: responce.data.message,
+        });
+        dispatch(deleteNode(selectedNodeId));
+      }
     }
   };
 
@@ -201,7 +213,9 @@ const Inspector: React.FC = () => {
 const InputField = ({
   label,
   value,
+  // @ts-ignore
   workflow_id,
+  // @ts-ignore
   user_id,
   onChange,
 }: {
@@ -209,6 +223,9 @@ const InputField = ({
   value: string;
   onChange: (v: string) => void;
 }) => {
+
+  console.log("Rendering InputField:", { label, value });
+  
   return (
     <div>
       <label className="text-sm font-medium text-gray-400 block mb-1">
