@@ -8,7 +8,7 @@ import DashboardPage from "./pages/DashboardPage";
 import EditorPage from "./pages/EditorPage";
 import WorkflowsPage from "./pages/WorkflowsPage";
 import { setAuthFromLocalStorage } from "./store/authSlice";
-
+import Onfrom  from "./pages/OnFrom";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 const App: React.FC = () => {
@@ -34,6 +34,7 @@ const App: React.FC = () => {
           <Route path="/dashboard" element={<DashboardPage/>} />
           <Route path="/editor/:workflowId" element={<EditorPage  key={`editor-${currentWorkflowId}`} workflowId={currentWorkflowId!} />} />
           <Route path="/workflows" element={<WorkflowsPage/>} />
+          <Route path="/onform/:workflow_id/:user_id" element={<Onfrom/>} />
         </Routes>
       </BrowserRouter>
 

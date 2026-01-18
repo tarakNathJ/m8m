@@ -4,7 +4,7 @@ import type {
   receive_email,
   scheduler,
   form,
-  webhook
+  webhook,
 } from "../types/index.js";
 
 class type_chack_for_steps_metadata {
@@ -26,7 +26,6 @@ class type_chack_for_steps_metadata {
   }
 
   is_telegram(obj: telegram): boolean {
-  
     if (
       typeof obj === "object" &&
       obj !== null &&
@@ -35,10 +34,10 @@ class type_chack_for_steps_metadata {
       typeof obj.token === "string" &&
       typeof obj.chatId === "string"
     ) {
-      console.log("true")
+      console.log("true");
       return true;
     } else {
-      console.log("false")
+      console.log("false");
       return false;
     }
   }
@@ -86,32 +85,36 @@ class type_chack_for_steps_metadata {
     );
   }
 
+
   is_from(obj: object): boolean {
     // chack this  object are not null
     if (typeof obj !== "object" || obj === null) {
       return false;
     }
 
-    let field: form;
-    // @ts-ignore
-    for (field in obj) {
-      if (!this.is_form_field_chacker(field)) {
-        return false;
-      }
+    if (!("email" in obj) || typeof (obj as any).email !== "string") {
+      return false;
     }
 
+    if (!("fields" in obj) || !Array.isArray((obj as any).fields)) {
+      return false;
+    }
     return true;
   }
 
   // webhook
   is_webhook(obj: webhook): boolean {
-
-    console.log(obj)
+    console.log(obj);
     // chack this  object are not null
-   if (typeof obj === "object" && obj !== null && "METHOD" in obj && typeof obj .METHOD === "string") {
+    if (
+      typeof obj === "object" &&
+      obj !== null &&
+      "METHOD" in obj &&
+      typeof obj.METHOD === "string"
+    ) {
       return true;
     } else {
-      return false
+      return false;
     }
   }
 }

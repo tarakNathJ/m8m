@@ -77,12 +77,13 @@ const EditorPage: React.FC<EditorPageProps> = ({ workflowId }) => {
     let startNodeId: any | null = null;
     for (const key in nodes) {
       // @ts-ignore
-      if (nodes[key].type === "webhook") {
+      if (nodes[key].type === "webhook" || nodes[key].type === "form") {
         startNodeId = nodes[key];
         break;
       }
     }
 
+    console.log(startNodeId);
     if (!startNodeId) {
       throw new Error("Webhook node not found");
     }
@@ -158,7 +159,7 @@ const EditorPage: React.FC<EditorPageProps> = ({ workflowId }) => {
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#4295f1] to-[#57a1f2] rounded-lg font-semibold"
           >
             <Play className="w-5 h-5" />
-            save 
+            save
           </motion.button>
         </div>
       </header>

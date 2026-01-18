@@ -7,10 +7,11 @@ import { Trash2, Save } from "lucide-react";
 import { Node } from "../../types";
 import { api_init } from "@/hooks/api";
 import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
 
 const Inspector: React.FC = () => {
   const dispatch = useDispatch();
-
+  const newId = uuidv4();
   const [node, setNode] = useState(0);
   const [type_of__step, setType_of_step] = useState({});
 
@@ -66,7 +67,7 @@ const Inspector: React.FC = () => {
     }
   }, [selectedNodeId, selectedNode]);
 
-  const handleFieldChange = (label: string, value: string) => {
+  const handleFieldChange = (label: string, value: any) => {
     setType_of_step(found);
     setFieldValues((prev) => ({
       ...prev,
@@ -74,17 +75,40 @@ const Inspector: React.FC = () => {
     }));
   };
 
+  const get_user_privious_step = JSON.parse(
+    sessionStorage.getItem("user_privious_step") || "null"
+  );
+
+  let status_of_step: any = {};
+  get_user_privious_step?.forEach((element: any) => {
+    if (element.id == selectedNodeId) {
+      status_of_step[1] = element.index;
+      status_of_step[2] = true;
+    }
+  });
+
   const handleSave = async () => {
     if (!selectedNodeId) return;
 
+    // console.log(fieldValues);
     const updatedNodeData = {
       metadata: fieldValues,
     };
 
     try {
+      console.log(
+        "Saving node with ID:          ",
+        selectedNodeId,
+        "           and data:",
+        selectedNode,
+        " and metadata:",
+        found
+      );
       const responce = await api_init.post("/api/workflow/create-step", {
         name: found.name,
-        index: parseInt(selectedNode.id),
+        index: status_of_step[2]
+          ? status_of_step[1]
+          : parseInt(selectedNode.id),
         workflow_id: JSON.parse(sessionStorage.getItem("workflow_id")),
         typeofstap_id: found.id,
         meta_data: fieldValues,
@@ -108,9 +132,9 @@ const Inspector: React.FC = () => {
       // console.log("Deleting node with ID:", selectedNodeId);
 
       const responce = await api_init.delete(
-        `/api/workflow/delete-step/${selectedNodeId}/${JSON.parse(
-          sessionStorage.getItem("workflow_id") || "null"
-        )}`
+        `/api/workflow/delete-step/${
+          status_of_step[2] ? status_of_step[1] : parseInt(selectedNode.id)
+        }/${JSON.parse(sessionStorage.getItem("workflow_id") || "null")}`
       );
       if (responce.data.success) {
         toast(`delete node : ${(type_of__step as any).name}`, {
@@ -175,6 +199,73 @@ const Inspector: React.FC = () => {
               );
             })}
 
+            {fieldValues["fields"] && Array.isArray(fieldValues["fields"]) ? (
+              <div className="mt-2">
+                <label className="text-sm font-medium text-gray-400 block mb-1">
+                  Fields
+                </label>
+                {fieldValues["fields"].map((field: any, index: number) => (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center gap-2 mb-2 mt-1"
+                  >
+                    <input
+                      type="text"
+                      placeholder="Label"
+                      value={field.label}
+                      onChange={(e) => {
+                        const updatedFields = [
+                          ...(fieldValues["fields"] || []),
+                        ];
+                        updatedFields[index].label = e.target.value;
+                        handleFieldChange("fields", updatedFields);
+                      }}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#4295f1]"
+                    />
+                    <select
+                      value={field.type}
+                      onChange={(e) => {
+                        const updatedFields = [
+                          ...(fieldValues["fields"] || []),
+                        ];
+                        updatedFields[index].type = e.target.value;
+                        handleFieldChange("fields", updatedFields);
+                      }}
+                      className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#4295f1]"
+                    >
+                      <option value="text">Text</option>
+                      <option value="number">Number</option>
+                      <option value="email">Email</option>
+                    </select>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              ""
+            )}
+
+            <div>
+              {selectedNode.type === "form" ? (
+                <motion.button
+                  onClick={() => {
+                    const updatedFields = [
+                      ...(fieldValues["fields"] || []),
+                      { id: newId, label: "", type: "text" },
+                    ];
+                    handleFieldChange("fields", updatedFields);
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full flex items-center justify-center gap-2 mt-4 py-2 bg-green-500/80 hover:bg-green-500 text-white font-semibold rounded-lg"
+                >
+                  {" "}
+                  add
+                </motion.button>
+              ) : (
+                ""
+              )}
+            </div>
+
             <div>
               <label className="text-sm font-medium text-gray-400 block mb-1">
                 Type
@@ -223,9 +314,6 @@ const InputField = ({
   value: string;
   onChange: (v: string) => void;
 }) => {
-
-  console.log("Rendering InputField:", { label, value });
-  
   return (
     <div>
       <label className="text-sm font-medium text-gray-400 block mb-1">
