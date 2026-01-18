@@ -11,7 +11,8 @@ import {
   save_workflow,
   delete_workflow,
   delete_step,
-  on_from_submission
+  on_from_submission,
+  from_submission
 } from "../controller/index.controller.js";
 import { verify_JWT } from "../middleware/index.middleware.js";
 
@@ -37,5 +38,6 @@ router
   .delete(verify_JWT, delete_step);
 
 router.route("/get-on-form/:workflow_id/:user_id").get(on_from_submission);
+router.route("/form-submission/:workflow_id/:user_id").post(from_submission);
 
 export default router;

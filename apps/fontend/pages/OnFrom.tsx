@@ -86,15 +86,41 @@ export default function N8nSubmitForm(): JSX.Element | null {
     }
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+    const controller = new AbortController();
+    try {
+      const responce = await axios.post(
+        `${import.meta.env.VITE_WORKFLOW_URL}/api/workflow/form-submission/${workflow_id}/${user_id}`,
+        formData,
+        { signal: controller.signal },
+      );
+      setIsSubmitted(responce.data.success);
+    } catch (error: any) {
+      if (axios.isCancel(error) || error.name === "CanceledError") {
+        console.log("Request canceled");
+      } else if (isAxiosError(error)) {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.errors
+        ) {
+          const apiErrors = error.response.data.errors;
+          const newErrors: FormErrors = {};
+          apiErrors.forEach((err: { field: string; message: string }) => {
+            newErrors[err.field as keyof FormErrors] = err.message;
+          });
+          setErrors(newErrors);
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    }
   };
 
   const handleClose = (): void => {
     setIsVisible(false);
   };
-  console.log("apiData", apiData);
 
   if (!isVisible || apiData === null) {
     return (
@@ -187,36 +213,8 @@ export default function N8nSubmitForm(): JSX.Element | null {
                 </p>
               )}
             </div>
-
-            {/* Phone field */}
-            {/* {apiData?.fields?.map((element, index) => {
-              console.log("element", element);
-
-              return (
-                <div
-                  key={index}
-                  className="space-y-2 animate-slide-up"
-                  style={{ animationDelay: "0.3s" }}
-                >
-                  <label
-                    htmlFor={element.name}
-                    className="block text-sm font-semibold text-gray-400"
-                  >
-                    {element.label}
-                  </label>
-                  <input
-                    type={element.type || "text"}
-                    id={element.name}
-                    name={element.name}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 bg-black/40 border border-sky-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-500/30 transition-all duration-300"
-                    placeholder={element.placeholder || ""}
-                  />
-                </div>
-              );
-            })} */}
             {apiData?.fields?.map((element, index) => {
-              if (!element.label) return null
+              if (!element.label) return null;
               return (
                 <div
                   key={index}
