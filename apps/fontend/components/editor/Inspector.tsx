@@ -130,7 +130,7 @@ const Inspector: React.FC = () => {
   const handleDelete = async () => {
     if (selectedNodeId) {
       // console.log("Deleting node with ID:", selectedNodeId);
-
+      dispatch(deleteNode(selectedNodeId));
       const responce = await api_init.delete(
         `/api/workflow/delete-step/${
           status_of_step[2] ? status_of_step[1] : parseInt(selectedNode.id)
@@ -140,7 +140,6 @@ const Inspector: React.FC = () => {
         toast(`delete node : ${(type_of__step as any).name}`, {
           description: responce.data.message,
         });
-        dispatch(deleteNode(selectedNodeId));
       }
     }
   };
@@ -245,7 +244,7 @@ const Inspector: React.FC = () => {
             )}
 
             <div>
-              {selectedNode.type === "form" ? (
+              {(selectedNode.type as string) === "form" ? (
                 <motion.button
                   onClick={() => {
                     const updatedFields = [
